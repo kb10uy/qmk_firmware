@@ -1,6 +1,7 @@
 /*
 Copyright 2019 @foostan
 Copyright 2020 Drashna Jaelre <@drashna>
+Copyright 2021 Yu Kobayashi <@kb10uy>
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -69,13 +70,115 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
-enum kb10uy_led_kind {
-    KB10UY_LK_NUMLOCK = 0,
-    KB10UY_LK_CAPSLOCK,
-    KB10UY_LK_SCROLLLOCK,
-};
+const rgblight_segment_t PROGMEM rgb_fixed_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 1, HSV_ORANGE },
+    { 6, 1, HSV_ORANGE },
+    { 12, 1, HSV_ORANGE },
+    { 18, 1, HSV_BLUE },
+    { 19, 1, HSV_RED }
+);
+
+const rgblight_segment_t PROGMEM rgb_default_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 1, HSV_ORANGE },
+    { 6, 1, HSV_ORANGE },
+    { 12, 1, HSV_ORANGE }
+);
+
+const rgblight_segment_t PROGMEM rgb_lower_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 1, 5, HSV_GREEN },
+    { 9, 3, HSV_BLUE },
+    { 15, 3, HSV_BLUE }
+);
+
+const rgblight_segment_t PROGMEM rgb_raise_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 7, 1, HSV_ORANGE },
+    { 9, 3, HSV_BLUE },
+    { 13, 1, HSV_ORANGE },
+    { 15, 3, HSV_BLUE }
+);
+
+const rgblight_segment_t PROGMEM rgb_adjust_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 7, 4, HSV_PURPLE },
+    { 13, 4, HSV_PURPLE },
+    { 17, 1, HSV_PINK }
+);
+
+const rgblight_segment_t* const PROGMEM rgb_layers_left[] = RGBLIGHT_LAYERS_LIST(
+    rgb_fixed_layer_left,
+    rgb_default_layer_left,
+    rgb_lower_layer_left,
+    rgb_raise_layer_left,
+    rgb_adjust_layer_left
+);
+
+const rgblight_segment_t PROGMEM rgb_fixed_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
+    RGBLIGHT_END_SEGMENTS
+);
+
+const rgblight_segment_t PROGMEM rgb_default_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 1, HSV_ORANGE }
+);
+
+const rgblight_segment_t PROGMEM rgb_lower_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 1, HSV_ORANGE },
+    { 1, 5, HSV_GREEN },
+    { 10, 1, HSV_CYAN },
+    { 15, 3, HSV_CYAN }
+);
+
+const rgblight_segment_t PROGMEM rgb_raise_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 3, HSV_ORANGE },
+    { 6, 1, HSV_GOLDENROD },
+    { 7, 1, HSV_GOLD },
+    { 8, 1, HSV_YELLOW },
+    { 12, 1, HSV_GOLDENROD },
+    { 13, 1, HSV_GOLD },
+    { 14, 1, HSV_YELLOW }
+);
+
+const rgblight_segment_t PROGMEM rgb_adjust_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 0, 1, HSV_ORANGE },
+    { 2, 3, HSV_GREEN },
+    { 8, 3, HSV_GREEN },
+    { 14, 3, HSV_GREEN },
+    { 19, 2, HSV_GREEN }
+);
+
+const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIST(
+    rgb_fixed_layer_right,
+    rgb_default_layer_right,
+    rgb_lower_layer_right,
+    rgb_raise_layer_right,
+    rgb_adjust_layer_right
+);
+
 
 char current_led_states[4] = { '-', '-', '-', 0 };
+
+void update_lighting_layers(layer_state_t state) {
+    rgblight_set_layer_state(0, true);
+    rgblight_set_layer_state(1, layer_state_cmp(state, 0) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(2, layer_state_cmp(state, 1) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(3, layer_state_cmp(state, 2) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(4, layer_state_cmp(state, 3));
+}
+
+void keyboard_post_init_user(void) {
+    rgblight_layers = (is_master) ? rgb_layers_left : rgb_layers_right;
+    update_lighting_layers(layer_state);
+}
+
+layer_state_t layer_state_set_user(layer_state_t state) {
+    update_lighting_layers(state);
+    return state;
+}
+
+bool led_update_user(led_t led_state) {
+    current_led_states[KB10UY_LK_NUMLOCK] = led_state.num_lock ? 'N' : '-';
+    current_led_states[KB10UY_LK_CAPSLOCK] = led_state.caps_lock ? 'C' : '-';
+    current_led_states[KB10UY_LK_SCROLLLOCK] = led_state.scroll_lock ? 'S' : '-';
+    return true;
+}
 
 #ifdef OLED_DRIVER_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
@@ -186,11 +289,3 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 #endif // OLED_DRIVER_ENABLES
-
-bool led_update_user(led_t led_state) {
-    current_led_states[KB10UY_LK_NUMLOCK] = led_state.num_lock ? 'N' : '-';
-    current_led_states[KB10UY_LK_CAPSLOCK] = led_state.caps_lock ? 'C' : '-';
-    current_led_states[KB10UY_LK_SCROLLLOCK] = led_state.scroll_lock ? 'S' : '-';
-
-    return true;
-}
