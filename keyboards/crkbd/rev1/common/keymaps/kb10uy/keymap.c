@@ -69,6 +69,14 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
+enum kb10uy_led_kind {
+    KB10UY_LK_NUMLOCK = 0,
+    KB10UY_LK_CAPSLOCK,
+    KB10UY_LK_SCROLLLOCK,
+};
+
+char current_led_states[4] = { '-', '-', '-', 0 };
+
 #ifdef OLED_DRIVER_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   if (!is_master) {
@@ -82,23 +90,28 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 #define L_RAISE 4
 #define L_ADJUST 8
 
+void oled_render_lock_state(void) {
+    oled_write_char('[', false);
+    oled_write(current_led_states, false);
+    oled_write_char(']', false);
+}
+
 void oled_render_layer_state(void) {
-    oled_write_P(PSTR("Layer: "), false);
     switch (layer_state) {
         case L_BASE:
-            oled_write_ln_P(PSTR("Default"), false);
+            oled_write_ln_P(PSTR(" Default"), false);
             break;
         case L_LOWER:
-            oled_write_ln_P(PSTR("Lower"), false);
+            oled_write_ln_P(PSTR(" Lower"), false);
             break;
         case L_RAISE:
-            oled_write_ln_P(PSTR("Raise"), false);
+            oled_write_ln_P(PSTR(" Raise"), false);
             break;
         case L_ADJUST:
         case L_ADJUST|L_LOWER:
         case L_ADJUST|L_RAISE:
         case L_ADJUST|L_LOWER|L_RAISE:
-            oled_write_ln_P(PSTR("Adjust"), false);
+            oled_write_ln_P(PSTR(" Adjust"), false);
             break;
     }
 }
@@ -158,6 +171,7 @@ void oled_render_logo(void) {
 
 void oled_task_user(void) {
     if (is_master) {
+        oled_render_lock_state();
         oled_render_layer_state();
         oled_render_keylog();
     } else {
@@ -171,4 +185,12 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   }
   return true;
 }
-#endif // OLED_DRIVER_ENABLE
+#endif // OLED_DRIVER_ENABLES
+
+bool led_update_user(led_t led_state) {
+    current_led_states[KB10UY_LK_NUMLOCK] = led_state.num_lock ? 'N' : '-';
+    current_led_states[KB10UY_LK_CAPSLOCK] = led_state.caps_lock ? 'C' : '-';
+    current_led_states[KB10UY_LK_SCROLLLOCK] = led_state.scroll_lock ? 'S' : '-';
+
+    return true;
+}
