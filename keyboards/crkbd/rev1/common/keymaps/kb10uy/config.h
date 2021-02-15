@@ -44,3 +44,33 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define RGBLIGHT_VAL_STEP 17
 
 #define OLED_FONT_H "keyboards/crkbd/lib/glcdfont.c"
+
+#define RGBLIGHT_LAYERS
+#define LED_LAYOUT( \
+    B01, B02, B03, B04, B05, B06,  \
+    B07, B08, B09, B10, B11, B12,  \
+    B13, B14, B15, B16, B17, B18,  \
+                   B19, B20, B21,  \
+         U01,      U02,      U03,  \
+         U04,      U05,      U06 ) \
+{ \
+    U03, U02, U01, U04, U05, U06,  \
+    B21, B18, B12, B06, B05, B11,  \
+    B17, B20, B19, B16, B10, B04,  \
+    B03, B09, B15, B14, B08, B02,  \
+    B01, B07, B13                  \
+}
+
+#define RGBLIGHT_LED_MAP LED_LAYOUT( \
+     0,  1,  2,  3,  4,  5, \
+     6,  7,  8,  9, 10, 11, \
+    12, 13, 14, 15, 16, 17, \
+                18, 19, 20, \
+    21, 22, 23, 24, 25, 26 )
+
+enum kb10uy_led_kind {
+    KB10UY_LK_NUMLOCK = 0,
+    KB10UY_LK_CAPSLOCK,
+    KB10UY_LK_SCROLLLOCK,
+};
+
