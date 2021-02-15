@@ -19,6 +19,26 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #include QMK_KEYBOARD_H
 
+#define TD_FN1 (TD(KB10UY_TD_FN1))
+
+enum kb10uy_led_kind {
+    KB10UY_LK_NUMLOCK = 0,
+    KB10UY_LK_CAPSLOCK,
+    KB10UY_LK_SCROLLLOCK,
+};
+
+enum kb10uy_tap_dance {
+    KB10UY_TD_FN1 = 0,
+};
+
+void update_lighting_layers(layer_state_t state);
+void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);
+void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data);
+
+qk_tap_dance_action_t tap_dance_actions[] = {
+    [KB10UY_TD_FN1] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_fn1_finished, dance_fn1_reset),
+};
+
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   [0] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
@@ -28,7 +48,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       KC_LCTL,    KC_Z,    KC_X,    KC_C,    KC_V,    KC_B,                         KC_N,    KC_M, KC_COMM,  KC_DOT, KC_SLSH, KC_INT1,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2),   MO(1), KC_LSFT,     KC_SPC,  KC_ENT, KC_RALT
+                                            MO(2),  TD_FN1, KC_LSFT,     KC_SPC,  KC_ENT, KC_RALT
                                       //`--------------------------'  `--------------------------'
 
   ),
@@ -41,7 +61,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, XXXXXXX, XXXXXXX,   KC_F4,   KC_F5,   KC_F6,                      KC_LEFT, KC_DOWN,KC_RIGHT, KC_LBRC, KC_RBRC, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(3),   MO(1), KC_LGUI,    KC_RSFT, KC_INT5, KC_INT4
+                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT, KC_INT5, KC_INT4
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -155,13 +175,7 @@ const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIS
 
 char current_led_states[4] = { '-', '-', '-', 0 };
 
-void update_lighting_layers(layer_state_t state) {
-    rgblight_set_layer_state(0, true);
-    rgblight_set_layer_state(1, layer_state_cmp(state, 0) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(2, layer_state_cmp(state, 1) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(3, layer_state_cmp(state, 2) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(4, layer_state_cmp(state, 3));
-}
+// Common user actions --------------------------------------------------------
 
 void keyboard_post_init_user(void) {
     rgblight_layers = (is_master) ? rgb_layers_left : rgb_layers_right;
@@ -179,6 +193,8 @@ bool led_update_user(led_t led_state) {
     current_led_states[KB10UY_LK_SCROLLLOCK] = led_state.scroll_lock ? 'S' : '-';
     return true;
 }
+
+// OLED user actions ----------------------------------------------------------
 
 #ifdef OLED_DRIVER_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
@@ -289,3 +305,29 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   return true;
 }
 #endif // OLED_DRIVER_ENABLES
+
+// User-defined functions -----------------------------------------------------
+
+void update_lighting_layers(layer_state_t state) {
+    rgblight_set_layer_state(0, true);
+    rgblight_set_layer_state(1, layer_state_cmp(state, 0) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(2, layer_state_cmp(state, 1) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(3, layer_state_cmp(state, 2) && !layer_state_cmp(state, 3));
+    rgblight_set_layer_state(4, layer_state_cmp(state, 3));
+}
+
+void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data) {
+    layer_on(1);
+
+    if (state->count >= 2) {
+        register_code16(KC_LSFT);
+    }
+}
+
+void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data) {
+    layer_off(1);
+
+    if (state->count >= 2) {
+        unregister_code16(KC_LSFT);
+    }
+}

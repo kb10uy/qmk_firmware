@@ -68,9 +68,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 18, 19, 20, \
     21, 22, 23, 24, 25, 26 )
 
-enum kb10uy_led_kind {
-    KB10UY_LK_NUMLOCK = 0,
-    KB10UY_LK_CAPSLOCK,
-    KB10UY_LK_SCROLLLOCK,
-};
-
+#define TAPPING_TERM 135
