@@ -1,6 +1,4 @@
-/* Copyright 2020 Christopher Courtney, aka Drashna Jael're  (@drashna) <drashna@live.com>
- * Copyright 2019 Sunjun Kim
- * Copyright 2020 Ploopy Corporation
+/* Copyright 2021 Atsushi Nagase
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +15,31 @@
  */
 #include QMK_KEYBOARD_H
 
+enum meishi2_moc_layers {
+    _DEFAULT,
+    _RAISE
+};
+
+#define PRO_MICRO_LED_TX D5
+#define RAISE MO(_RAISE)
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = LAYOUT(/* Base */
-                 C(KC_C), KC_BTN1, KC_BTN3, LT(1, KC_BTN2), C(KC_V), KC_BTN4, KC_BTN5, DPI_CONFIG),
-    [1] = LAYOUT(/* Base */
-                 _______, DRAG_SCROLL, _______, _______, _______, _______, _______, RESET),
-
+  [_DEFAULT] = LAYOUT( /* Base */
+    RAISE, KC_B, KC_N, KC_SPC
+  ),
+  [_RAISE] = LAYOUT( /* Raise */
+    _______, KC_LEFT, KC_RGHT, LSFT(KC_S)
+  )
 };
+
+void matrix_init_user(void) {
+  setPinOutput(PRO_MICRO_LED_TX);
+  writePinHigh(PRO_MICRO_LED_TX);
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (keycode == RAISE) {
+    writePin(PRO_MICRO_LED_TX, !record->event.pressed);
+  }
+  return true;
+}

@@ -1,6 +1,4 @@
-/* Copyright 2020 Christopher Courtney, aka Drashna Jael're  (@drashna) <drashna@live.com>
- * Copyright 2019 Sunjun Kim
- * Copyright 2020 Ploopy Corporation
+/* Copyright 2020 Muhammad Galib (polycarbdiet) <pd.keyboards@gmail.com>
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +13,5 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#include QMK_KEYBOARD_H
 
-
-const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-    [0] = LAYOUT(/* Base */
-                 C(KC_C), KC_BTN1, KC_BTN3, LT(1, KC_BTN2), C(KC_V), KC_BTN4, KC_BTN5, DPI_CONFIG),
-    [1] = LAYOUT(/* Base */
-                 _______, DRAG_SCROLL, _______, _______, _______, _______, _______, RESET),
-
-};
+#include "s20.h"
