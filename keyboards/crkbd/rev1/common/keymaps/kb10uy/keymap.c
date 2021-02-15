@@ -20,6 +20,14 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #include QMK_KEYBOARD_H
 
 #define TD_FN1 (TD(KB10UY_TD_FN1))
+#define L_BASE 0
+#define L_LOWER 2
+#define L_RAISE 4
+#define L_ADJUST 8
+
+enum kb10uy_key_code {
+    K1_OLED = SAFE_RANGE,
+};
 
 enum kb10uy_led_kind {
     KB10UY_LK_NUMLOCK = 0,
@@ -31,9 +39,17 @@ enum kb10uy_tap_dance {
     KB10UY_TD_FN1 = 0,
 };
 
+void oled_render_lock_state(void);
+void oled_render_layer_state(void);
+void set_keylog(uint16_t keycode, keyrecord_t *record);
+void oled_render_keylog(void);
+void render_bootmagic_status(bool status);
+void oled_render_logo(void);
 void update_lighting_layers(layer_state_t state);
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);
 void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data);
+
+// ----------------------------------------------------------------------------
 
 qk_tap_dance_action_t tap_dance_actions[] = {
     [KB10UY_TD_FN1] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_fn1_finished, dance_fn1_reset),
@@ -172,14 +188,30 @@ const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIS
     rgb_adjust_layer_right
 );
 
-
 char current_led_states[4] = { '-', '-', '-', 0 };
+
+char keylog_str[24] = {};
+
+const char code_to_name[60] = {
+    ' ', ' ', ' ', ' ', 'a', 'b', 'c', 'd', 'e', 'f',
+    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
+    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    'R', 'E', 'B', 'T', '_', '-', '=', '[', ']', '\\',
+    '#', ';', '\'', '`', ',', '.', '/', ' ', ' ', ' '};
 
 // Common user actions --------------------------------------------------------
 
 void keyboard_post_init_user(void) {
     rgblight_layers = (is_master) ? rgb_layers_left : rgb_layers_right;
     update_lighting_layers(layer_state);
+}
+
+bool process_record_user(uint16_t keycode, keyrecord_t *record) {
+  if (record->event.pressed) {
+    set_keylog(keycode, record);
+  }
+  return true;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
@@ -194,9 +226,6 @@ bool led_update_user(led_t led_state) {
     return true;
 }
 
-// OLED user actions ----------------------------------------------------------
-
-#ifdef OLED_DRIVER_ENABLE
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   if (!is_master) {
     return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
@@ -204,10 +233,17 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
   return rotation;
 }
 
-#define L_BASE 0
-#define L_LOWER 2
-#define L_RAISE 4
-#define L_ADJUST 8
+void oled_task_user(void) {
+    if (is_master) {
+        oled_render_lock_state();
+        oled_render_layer_state();
+        oled_render_keylog();
+    } else {
+        oled_render_logo();
+    }
+}
+
+// OLED user actions ----------------------------------------------------------
 
 void oled_render_lock_state(void) {
     oled_write_char('[', false);
@@ -234,17 +270,6 @@ void oled_render_layer_state(void) {
             break;
     }
 }
-
-
-char keylog_str[24] = {};
-
-const char code_to_name[60] = {
-    ' ', ' ', ' ', ' ', 'a', 'b', 'c', 'd', 'e', 'f',
-    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p',
-    'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
-    'R', 'E', 'B', 'T', '_', '-', '=', '[', ']', '\\',
-    '#', ';', '\'', '`', ',', '.', '/', ' ', ' ', ' '};
 
 void set_keylog(uint16_t keycode, keyrecord_t *record) {
   char name = ' ';
@@ -287,24 +312,6 @@ void oled_render_logo(void) {
         0};
     oled_write_P(crkbd_logo, false);
 }
-
-void oled_task_user(void) {
-    if (is_master) {
-        oled_render_lock_state();
-        oled_render_layer_state();
-        oled_render_keylog();
-    } else {
-        oled_render_logo();
-    }
-}
-
-bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
-    set_keylog(keycode, record);
-  }
-  return true;
-}
-#endif // OLED_DRIVER_ENABLES
 
 // User-defined functions -----------------------------------------------------
 
