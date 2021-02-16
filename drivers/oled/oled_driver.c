@@ -272,7 +272,7 @@ static void rotate_90(const uint8_t *src, uint8_t *dest) {
 }
 
 void oled_render(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return;
     }
 
@@ -532,7 +532,7 @@ void oled_write_raw_P(const char *data, uint16_t size) {
 #endif  // defined(__AVR__)
 
 bool oled_on(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return oled_active;
     }
 
@@ -552,7 +552,7 @@ bool oled_on(void) {
 }
 
 bool oled_off(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return !oled_active;
     }
 
@@ -594,7 +594,7 @@ bool is_oled_paused(void) {
 }
 
 uint8_t oled_set_brightness(uint8_t level) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return oled_brightness;
     }
 
@@ -637,7 +637,7 @@ void oled_scroll_set_speed(uint8_t speed) {
 }
 
 bool oled_scroll_right(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return oled_scrolling;
     }
 
@@ -655,7 +655,7 @@ bool oled_scroll_right(void) {
 }
 
 bool oled_scroll_left(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return oled_scrolling;
     }
 
@@ -673,7 +673,7 @@ bool oled_scroll_left(void) {
 }
 
 bool oled_scroll_off(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return !oled_scrolling;
     }
 
@@ -704,7 +704,7 @@ uint8_t oled_max_lines(void) {
 }
 
 void oled_task(void) {
-    if (!oled_initialized) {
+    if (!oled_initialized || oled_paused) {
         return;
     }
 
