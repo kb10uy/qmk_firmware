@@ -236,6 +236,12 @@ void matrix_slave_scan_user(void) {
     sync_statuses[KB10UY_SY_CAPSLOCK] = sync & (1 << KB10UY_SY_CAPSLOCK);
     sync_statuses[KB10UY_SY_SCROLLLOCK] = sync & (1 << KB10UY_SY_SCROLLLOCK);
     sync_statuses[KB10UY_SY_RECORDING] = sync & (1 << KB10UY_SY_RECORDING);
+
+    if (is_oled_paused() == sync_statuses[KB10UY_SY_RECORDING]) {
+        // Keep consistency of flags
+        toggle_recording();
+        toggle_recording();
+    }
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
