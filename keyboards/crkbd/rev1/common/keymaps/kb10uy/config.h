@@ -73,4 +73,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
                 18, 19, 20, \
     21, 22, 23, 24, 25, 26 )
 
-#define TAPPING_TERM 135
+#define TAPPING_TERM 175
