@@ -139,6 +139,7 @@ typedef struct _Serial_s2m_buffer_t {
 } Serial_s2m_buffer_t;
 
 typedef struct _Serial_m2s_buffer_t {
+    uint8_t sync_data;
 #    ifdef BACKLIGHT_ENABLE
     uint8_t backlight_level;
 #    endif
@@ -195,6 +196,14 @@ SSTD_t transactions[] = {
 void transport_master_init(void) { soft_serial_initiator_init(transactions, TID_LIMIT(transactions)); }
 
 void transport_slave_init(void) { soft_serial_target_init(transactions, TID_LIMIT(transactions)); }
+
+uint8_t transport_get_sync(void) {
+    return serial_m2s_buffer.sync_data;
+}
+
+void transport_set_sync(uint8_t data) {
+    serial_m2s_buffer.sync_data = data;
+}
 
 #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
 
