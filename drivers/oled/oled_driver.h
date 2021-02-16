@@ -265,6 +265,12 @@ bool oled_off(void);
 // not
 bool is_oled_on(void);
 
+bool oled_pause(void);
+
+bool oled_resume(void);
+
+bool is_oled_paused(void);
+
 // Sets the brightness of the display
 uint8_t oled_set_brightness(uint8_t level);
 

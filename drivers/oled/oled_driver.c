@@ -107,6 +107,7 @@ OLED_BLOCK_TYPE oled_dirty          = 0;
 bool            oled_initialized    = false;
 bool            oled_active         = false;
 bool            oled_scrolling      = false;
+bool            oled_paused         = false;
 uint8_t         oled_brightness     = OLED_BRIGHTNESS;
 uint8_t         oled_rotation       = 0;
 uint8_t         oled_rotation_width = 0;
@@ -567,6 +568,30 @@ bool oled_off(void) {
 }
 
 bool is_oled_on(void) { return oled_active; }
+
+bool oled_pause(void) {
+    if (!oled_initialized) {
+        return oled_paused;
+    }
+
+    oled_paused = true;
+
+    return oled_paused;
+}
+
+bool oled_resume(void) {
+    if (!oled_initialized) {
+        return oled_paused;
+    }
+
+    oled_paused = false;
+
+    return oled_paused;
+}
+
+bool is_oled_paused(void) {
+    return oled_paused;
+}
 
 uint8_t oled_set_brightness(uint8_t level) {
     if (!oled_initialized) {
