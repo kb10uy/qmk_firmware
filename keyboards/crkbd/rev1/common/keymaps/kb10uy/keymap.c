@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "transport_ex.h"
 
 #define TD_FN1 (TD(KB10UY_TD_FN1))
 #define L_BASE 0
@@ -29,14 +30,15 @@ enum kb10uy_key_code {
     K1_OLED = SAFE_RANGE,
 };
 
-enum kb10uy_led_kind {
-    KB10UY_LK_NUMLOCK = 0,
-    KB10UY_LK_CAPSLOCK,
-    KB10UY_LK_SCROLLLOCK,
-};
-
 enum kb10uy_tap_dance {
     KB10UY_TD_FN1 = 0,
+};
+
+enum kb10uy_sync_bit {
+    KB10UY_SY_NUMLOCK = 0,
+    KB10UY_SY_CAPSLOCK,
+    KB10UY_SY_SCROLLLOCK,
+    KB10UY_SY_RECORDING,
 };
 
 void oled_render_lock_state(void);
@@ -95,11 +97,11 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [3] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, XXXXXXX,
+      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, RGB_HUI, RGB_SAI, RGB_VAI, RGB_MOD, XXXXXXX,                      KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, RGB_HUD, RGB_SAD, RGB_VAD,RGB_RMOD, RGB_TOG,                      XXXXXXX,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
+      _______, RGB_HUD, RGB_SAD, RGB_VAD,RGB_RMOD, RGB_TOG,                      KC_NLCK,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             MO(3),   MO(3), XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
                                       //`--------------------------'  `--------------------------'
@@ -177,6 +179,7 @@ const rgblight_segment_t PROGMEM rgb_adjust_layer_right[] = RGBLIGHT_LAYER_SEGME
     { 2, 3, HSV_GREEN },
     { 8, 3, HSV_GREEN },
     { 14, 3, HSV_GREEN },
+    { 17, 1, HSV_CHARTREUSE },
     { 19, 2, HSV_GREEN }
 );
 
@@ -188,7 +191,12 @@ const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIS
     rgb_adjust_layer_right
 );
 
-char current_led_states[4] = { '-', '-', '-', 0 };
+bool sync_statuses[4] = {
+    [KB10UY_SY_NUMLOCK] = false,
+    [KB10UY_SY_CAPSLOCK] = false,
+    [KB10UY_SY_SCROLLLOCK] = false,
+    [KB10UY_SY_RECORDING] = true,
+};
 
 char keylog_str[24] = {};
 
@@ -207,6 +215,25 @@ void keyboard_post_init_user(void) {
     update_lighting_layers(layer_state);
 }
 
+// Called before data sync
+void matrix_scan_user(void) {
+    uint8_t sync = 0;
+    sync |= sync_statuses[KB10UY_SY_NUMLOCK] << KB10UY_SY_NUMLOCK;
+    sync |= sync_statuses[KB10UY_SY_CAPSLOCK] << KB10UY_SY_CAPSLOCK;
+    sync |= sync_statuses[KB10UY_SY_SCROLLLOCK] << KB10UY_SY_SCROLLLOCK;
+    sync |= sync_statuses[KB10UY_SY_RECORDING] << KB10UY_SY_RECORDING;
+    transport_set_sync(sync);
+}
+
+// Called after data sync
+void matrix_slave_scan_user(void) {
+    uint8_t sync = transport_get_sync();
+    sync_statuses[KB10UY_SY_NUMLOCK] = sync & (1 << KB10UY_SY_NUMLOCK);
+    sync_statuses[KB10UY_SY_CAPSLOCK] = sync & (1 << KB10UY_SY_CAPSLOCK);
+    sync_statuses[KB10UY_SY_SCROLLLOCK] = sync & (1 << KB10UY_SY_SCROLLLOCK);
+    sync_statuses[KB10UY_SY_RECORDING] = sync & (1 << KB10UY_SY_RECORDING);
+}
+
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
   if (record->event.pressed) {
     set_keylog(keycode, record);
@@ -220,9 +247,9 @@ layer_state_t layer_state_set_user(layer_state_t state) {
 }
 
 bool led_update_user(led_t led_state) {
-    current_led_states[KB10UY_LK_NUMLOCK] = led_state.num_lock ? 'N' : '-';
-    current_led_states[KB10UY_LK_CAPSLOCK] = led_state.caps_lock ? 'C' : '-';
-    current_led_states[KB10UY_LK_SCROLLLOCK] = led_state.scroll_lock ? 'S' : '-';
+    sync_statuses[KB10UY_SY_NUMLOCK] = led_state.num_lock;
+    sync_statuses[KB10UY_SY_CAPSLOCK] = led_state.caps_lock;
+    sync_statuses[KB10UY_SY_SCROLLLOCK] = led_state.scroll_lock;
     return true;
 }
 
@@ -234,7 +261,7 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 }
 
 void oled_task_user(void) {
-    if (is_master) {
+    if (true) {
         oled_render_lock_state();
         oled_render_layer_state();
         oled_render_keylog();
@@ -247,7 +274,9 @@ void oled_task_user(void) {
 
 void oled_render_lock_state(void) {
     oled_write_char('[', false);
-    oled_write(current_led_states, false);
+    oled_write_char(sync_statuses[KB10UY_SY_NUMLOCK] ? 'N' : ' ', false);
+    oled_write_char(sync_statuses[KB10UY_SY_CAPSLOCK] ? 'C' : ' ', false);
+    oled_write_char(sync_statuses[KB10UY_SY_SCROLLLOCK] ? 'S' : ' ', false);
     oled_write_char(']', false);
 }
 
