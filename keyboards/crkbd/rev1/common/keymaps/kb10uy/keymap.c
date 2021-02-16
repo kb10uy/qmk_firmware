@@ -28,6 +28,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum kb10uy_key_code {
     K1_OLED = SAFE_RANGE,
+    K1_JPN,
+    K1_ENG,
 };
 
 enum kb10uy_tap_dance {
@@ -48,6 +50,7 @@ void oled_render_keylog(void);
 void render_bootmagic_status(bool status);
 void oled_render_logo(void);
 void update_lighting_layers(layer_state_t state);
+void toggle_recording(void);
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);
 void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data);
 
@@ -79,7 +82,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, XXXXXXX, XXXXXXX,   KC_F4,   KC_F5,   KC_F6,                      KC_LEFT, KC_DOWN,KC_RIGHT, KC_LBRC, KC_RBRC, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT, KC_INT5, KC_INT4
+                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT,  K1_ENG,  K1_JPN
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -91,7 +94,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_LALT, XXXXXXX,  KC_F10,  KC_F11,  KC_F12,                      XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL,  KC_END, KC_PGDN,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2),   MO(3), KC_LSFT,    KC_RSFT,KC_LANG2,KC_LANG1
+                                            MO(2),   MO(3), KC_LSFT,    KC_RSFT, XXXXXXX, XXXXXXX
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -99,7 +102,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, RGB_HUI, RGB_SAI, RGB_VAI, RGB_MOD, XXXXXXX,                      KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
+      _______, RGB_HUI, RGB_SAI, RGB_VAI, RGB_MOD, K1_OLED,                      KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, RGB_HUD, RGB_SAD, RGB_VAD,RGB_RMOD, RGB_TOG,                      KC_NLCK,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
@@ -137,6 +140,7 @@ const rgblight_segment_t PROGMEM rgb_raise_layer_left[] = RGBLIGHT_LAYER_SEGMENT
 
 const rgblight_segment_t PROGMEM rgb_adjust_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
     { 7, 4, HSV_PURPLE },
+    { 11, 1, HSV_RED },
     { 13, 4, HSV_PURPLE },
     { 17, 1, HSV_PINK }
 );
@@ -235,10 +239,37 @@ void matrix_slave_scan_user(void) {
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
-  if (record->event.pressed) {
-    set_keylog(keycode, record);
-  }
-  return true;
+    if (sync_statuses[KB10UY_SY_RECORDING] && record->event.pressed) {
+        set_keylog(keycode, record);
+    }
+
+    switch (keycode) {
+        case K1_OLED:
+            if (record->event.pressed) {
+                toggle_recording();
+            }
+            return false;
+        case K1_ENG:
+            if (record->event.pressed) {
+                register_code(KC_INT5);
+                register_code(KC_LANG2);
+            } else {
+                unregister_code(KC_INT5);
+                unregister_code(KC_LANG2);
+            }
+            return false;
+        case K1_JPN:
+            if (record->event.pressed) {
+                register_code(KC_INT4);
+                register_code(KC_LANG1);
+            } else {
+                unregister_code(KC_INT4);
+                unregister_code(KC_LANG1);
+            }
+            return false;
+        default:
+            return true;
+    }
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
@@ -254,14 +285,14 @@ bool led_update_user(led_t led_state) {
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-  if (!is_master) {
-    return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
-  }
-  return rotation;
+    if (!is_master) {
+        return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
+    }
+    return rotation;
 }
 
 void oled_task_user(void) {
-    if (true) {
+    if (is_master) {
         oled_render_lock_state();
         oled_render_layer_state();
         oled_render_keylog();
@@ -350,6 +381,16 @@ void update_lighting_layers(layer_state_t state) {
     rgblight_set_layer_state(2, layer_state_cmp(state, 1) && !layer_state_cmp(state, 3));
     rgblight_set_layer_state(3, layer_state_cmp(state, 2) && !layer_state_cmp(state, 3));
     rgblight_set_layer_state(4, layer_state_cmp(state, 3));
+}
+
+void toggle_recording(void) {
+    if (sync_statuses[KB10UY_SY_RECORDING]) {
+        oled_pause();
+        sync_statuses[KB10UY_SY_RECORDING] = false;
+    } else {
+        oled_resume();
+        sync_statuses[KB10UY_SY_RECORDING] = true;
+    }
 }
 
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data) {
