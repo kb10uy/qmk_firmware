@@ -28,6 +28,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 enum kb10uy_key_code {
     K1_OLED = SAFE_RANGE,
+    K1_WIMA,
     K1_JPN,
     K1_ENG,
 };
@@ -41,6 +42,7 @@ enum kb10uy_sync_bit {
     KB10UY_SY_CAPSLOCK,
     KB10UY_SY_SCROLLLOCK,
     KB10UY_SY_RECORDING,
+    KB10UY_SY_MACOS,
 };
 
 void oled_render_lock_state(void);
@@ -78,23 +80,23 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-      _______, XXXXXXX, XXXXXXX,   KC_F1,   KC_F2,   KC_F3,                      XXXXXXX,   KC_UP, XXXXXXX, KC_MINS,  KC_EQL, KC_INT3,
+      _______, XXXXXXX, XXXXXXX,   KC_F1,   KC_F2,   KC_F3,                      KC_COMM,   KC_UP,  KC_DOT, KC_MINS,  KC_EQL, KC_INT3,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, XXXXXXX, XXXXXXX,   KC_F4,   KC_F5,   KC_F6,                      KC_LEFT, KC_DOWN,KC_RIGHT, KC_LBRC, KC_RBRC, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT,  K1_ENG,  K1_JPN
+                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT, _______, _______
                                       //`--------------------------'  `--------------------------'
   ),
 
   [2] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS,
+      _______, K1_WIMA, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_CAPS, XXXXXXX,   KC_F7,   KC_F8,   KC_F9,                      XXXXXXX, XXXXXXX, XXXXXXX,  KC_INS, KC_HOME, KC_PGUP,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_LALT, XXXXXXX,  KC_F10,  KC_F11,  KC_F12,                      XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL,  KC_END, KC_PGDN,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2),   MO(3), KC_LSFT,    KC_RSFT, XXXXXXX, XXXXXXX
+                                            MO(2),   MO(3), KC_LSFT,    KC_RSFT,  K1_ENG,  K1_JPN
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -132,6 +134,7 @@ const rgblight_segment_t PROGMEM rgb_lower_layer_left[] = RGBLIGHT_LAYER_SEGMENT
 );
 
 const rgblight_segment_t PROGMEM rgb_raise_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
+    { 1, 1, HSV_ORANGE },
     { 7, 1, HSV_ORANGE },
     { 9, 3, HSV_BLUE },
     { 13, 1, HSV_ORANGE },
@@ -195,11 +198,12 @@ const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIS
     rgb_adjust_layer_right
 );
 
-bool sync_statuses[4] = {
+bool sync_statuses[] = {
     [KB10UY_SY_NUMLOCK] = false,
     [KB10UY_SY_CAPSLOCK] = false,
     [KB10UY_SY_SCROLLLOCK] = false,
     [KB10UY_SY_RECORDING] = true,
+    [KB10UY_SY_MACOS] = false,
 };
 
 char keylog_str[24] = {};
@@ -226,6 +230,7 @@ void matrix_scan_user(void) {
     sync |= sync_statuses[KB10UY_SY_CAPSLOCK] << KB10UY_SY_CAPSLOCK;
     sync |= sync_statuses[KB10UY_SY_SCROLLLOCK] << KB10UY_SY_SCROLLLOCK;
     sync |= sync_statuses[KB10UY_SY_RECORDING] << KB10UY_SY_RECORDING;
+    sync |= sync_statuses[KB10UY_SY_MACOS] << KB10UY_SY_MACOS;
     transport_set_sync(sync);
 }
 
@@ -236,6 +241,7 @@ void matrix_slave_scan_user(void) {
     sync_statuses[KB10UY_SY_CAPSLOCK] = sync & (1 << KB10UY_SY_CAPSLOCK);
     sync_statuses[KB10UY_SY_SCROLLLOCK] = sync & (1 << KB10UY_SY_SCROLLLOCK);
     sync_statuses[KB10UY_SY_RECORDING] = sync & (1 << KB10UY_SY_RECORDING);
+    sync_statuses[KB10UY_SY_MACOS] = sync & (1 << KB10UY_SY_MACOS);
 
     if (is_oled_paused() == sync_statuses[KB10UY_SY_RECORDING]) {
         // Keep consistency of flags
@@ -254,28 +260,28 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             if (record->event.pressed) {
                 toggle_recording();
             }
-            return false;
+            break;
+        case K1_WIMA:
+            if (record->event.pressed) {
+                sync_statuses[KB10UY_SY_MACOS] = !sync_statuses[KB10UY_SY_MACOS];
+            }
+            break;
         case K1_ENG:
             if (record->event.pressed) {
-                register_code(KC_INT5);
-                register_code(KC_LANG2);
+                register_code(sync_statuses[KB10UY_SY_MACOS] ? KC_LANG2 : KC_INT5);
             } else {
-                unregister_code(KC_INT5);
-                unregister_code(KC_LANG2);
+                unregister_code(sync_statuses[KB10UY_SY_MACOS] ? KC_LANG2 : KC_INT5);
             }
-            return false;
+            break;
         case K1_JPN:
             if (record->event.pressed) {
-                register_code(KC_INT4);
-                register_code(KC_LANG1);
+                register_code(sync_statuses[KB10UY_SY_MACOS] ? KC_LANG1 : KC_INT4);
             } else {
-                unregister_code(KC_INT4);
-                unregister_code(KC_LANG1);
+                unregister_code(sync_statuses[KB10UY_SY_MACOS] ? KC_LANG1 : KC_INT4);
             }
-            return false;
-        default:
-            return true;
+            break;
     }
+    return true;
 }
 
 layer_state_t layer_state_set_user(layer_state_t state) {
@@ -318,21 +324,27 @@ void oled_render_lock_state(void) {
 }
 
 void oled_render_layer_state(void) {
+    if (sync_statuses[KB10UY_SY_MACOS]) {
+        oled_write_P(PSTR(" mac "), false);
+    } else {
+        oled_write_P(PSTR(" Win "), false);
+    }
+
     switch (layer_state) {
         case L_BASE:
-            oled_write_ln_P(PSTR(" Default"), false);
+            oled_write_ln_P(PSTR("Default"), false);
             break;
         case L_LOWER:
-            oled_write_ln_P(PSTR(" Lower"), false);
+            oled_write_ln_P(PSTR("Lower"), false);
             break;
         case L_RAISE:
-            oled_write_ln_P(PSTR(" Raise"), false);
+            oled_write_ln_P(PSTR("Raise"), false);
             break;
         case L_ADJUST:
         case L_ADJUST|L_LOWER:
         case L_ADJUST|L_RAISE:
         case L_ADJUST|L_LOWER|L_RAISE:
-            oled_write_ln_P(PSTR(" Adjust"), false);
+            oled_write_ln_P(PSTR("Adjust"), false);
             break;
     }
 }
