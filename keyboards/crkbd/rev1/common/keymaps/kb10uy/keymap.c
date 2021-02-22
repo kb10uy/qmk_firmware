@@ -18,52 +18,18 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include QMK_KEYBOARD_H
+#include "keymap.h"
 #include "transport_ex.h"
-
-#define TD_FN1 (TD(KB10UY_TD_FN1))
-#define L_BASE 0
-#define L_LOWER 2
-#define L_RAISE 4
-#define L_ADJUST 8
-
-enum kb10uy_key_code {
-    K1_OLED = SAFE_RANGE,
-    K1_WIMA,
-    K1_JPN,
-    K1_ENG,
-};
-
-enum kb10uy_tap_dance {
-    KB10UY_TD_FN1 = 0,
-};
-
-enum kb10uy_sync_bit {
-    KB10UY_SY_NUMLOCK = 0,
-    KB10UY_SY_CAPSLOCK,
-    KB10UY_SY_SCROLLLOCK,
-    KB10UY_SY_RECORDING,
-    KB10UY_SY_MACOS,
-};
-
-void oled_render_lock_state(void);
-void oled_render_layer_state(void);
-void set_keylog(uint16_t keycode, keyrecord_t *record);
-void oled_render_keylog(void);
-void render_bootmagic_status(bool status);
-void oled_render_logo(void);
-void update_lighting_layers(layer_state_t state);
-void toggle_recording(void);
-void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);
-void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data);
 
 // ----------------------------------------------------------------------------
 
 qk_tap_dance_action_t tap_dance_actions[] = {
+    /* Lower layer with "Double Tap to Shift" */
     [KB10UY_TD_FN1] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_fn1_finished, dance_fn1_reset),
 };
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
-  [0] = LAYOUT_split_3x6_3(
+  [_DEFAULT] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
        KC_ESC,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,                         KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -73,10 +39,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             MO(2),  TD_FN1, KC_LSFT,     KC_SPC,  KC_ENT, KC_RALT
                                       //`--------------------------'  `--------------------------'
-
   ),
 
-  [1] = LAYOUT_split_3x6_3(
+  [_LOWER] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______,    KC_1,    KC_2,    KC_3,    KC_4,    KC_5,                         KC_6,    KC_7,    KC_8,    KC_9,    KC_0, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -88,7 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                       //`--------------------------'  `--------------------------'
   ),
 
-  [2] = LAYOUT_split_3x6_3(
+  [_RAISE] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______, K1_WIMA, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -100,7 +65,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
                                       //`--------------------------'  `--------------------------'
   ),
 
-  [3] = LAYOUT_split_3x6_3(
+  [_ADJUST] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
       _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -324,26 +289,25 @@ void oled_render_lock_state(void) {
 }
 
 void oled_render_layer_state(void) {
+    uint8_t highest_layer = get_highest_layer(layer_state);
+
     if (sync_statuses[KB10UY_SY_MACOS]) {
         oled_write_P(PSTR(" mac "), false);
     } else {
         oled_write_P(PSTR(" Win "), false);
     }
 
-    switch (layer_state) {
-        case L_BASE:
+    switch (highest_layer) {
+        case _DEFAULT:
             oled_write_ln_P(PSTR("Default"), false);
             break;
-        case L_LOWER:
+        case _LOWER:
             oled_write_ln_P(PSTR("Lower"), false);
             break;
-        case L_RAISE:
+        case _RAISE:
             oled_write_ln_P(PSTR("Raise"), false);
             break;
-        case L_ADJUST:
-        case L_ADJUST|L_LOWER:
-        case L_ADJUST|L_RAISE:
-        case L_ADJUST|L_LOWER|L_RAISE:
+        case _ADJUST:
             oled_write_ln_P(PSTR("Adjust"), false);
             break;
     }
