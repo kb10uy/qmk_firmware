@@ -17,9 +17,7 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include QMK_KEYBOARD_H
 #include "keymap.h"
-#include "transport_ex.h"
 
 // ----------------------------------------------------------------------------
 
@@ -78,90 +76,55 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   )
 };
 
-const rgblight_segment_t PROGMEM rgb_fixed_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 1, HSV_ORANGE },
-    { 6, 1, HSV_ORANGE },
-    { 12, 1, HSV_ORANGE },
-    { 18, 1, HSV_BLUE },
-    { 19, 1, HSV_RED }
-);
+const rgblight_segment_t PROGMEM rgb_layer_definitions[] = {
+    /* Left fixed */
+    { 0, 1, HSV_ORANGE }, { 6, 1, HSV_ORANGE }, { 12, 1, HSV_ORANGE }, { 18, 1, HSV_BLUE }, { 19, 1, HSV_RED }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_default_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 1, HSV_ORANGE },
-    { 6, 1, HSV_ORANGE },
-    { 12, 1, HSV_ORANGE }
-);
+    /* Left default */
+    { 0, 1, HSV_ORANGE }, { 6, 1, HSV_ORANGE }, { 12, 1, HSV_ORANGE }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_lower_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 1, 5, HSV_GREEN },
-    { 9, 3, HSV_BLUE },
-    { 15, 3, HSV_BLUE }
-);
+    /* Left, lower */
+    { 1, 5, HSV_GREEN }, { 9, 3, HSV_BLUE }, { 15, 3, HSV_BLUE }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_raise_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 1, 1, HSV_ORANGE },
-    { 7, 1, HSV_ORANGE },
-    { 9, 3, HSV_BLUE },
-    { 13, 1, HSV_ORANGE },
-    { 15, 3, HSV_BLUE }
-);
+    /* Left raise */
+    { 1, 1, HSV_ORANGE }, { 7, 1, HSV_ORANGE }, { 9, 3, HSV_BLUE }, { 13, 1, HSV_ORANGE }, { 15, 3, HSV_BLUE }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_adjust_layer_left[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 7, 4, HSV_PURPLE },
-    { 11, 1, HSV_RED },
-    { 13, 4, HSV_PURPLE },
-    { 17, 1, HSV_PINK }
-);
+    /* Left adjust */
+    { 7, 4, HSV_PURPLE }, { 11, 1, HSV_RED }, { 13, 4, HSV_PURPLE }, { 17, 1, HSV_PINK }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t* const PROGMEM rgb_layers_left[] = RGBLIGHT_LAYERS_LIST(
-    rgb_fixed_layer_left,
-    rgb_default_layer_left,
-    rgb_lower_layer_left,
-    rgb_raise_layer_left,
-    rgb_adjust_layer_left
-);
+    /* Right fixed */
+    RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_fixed_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
-    RGBLIGHT_END_SEGMENTS
-);
+    /* Right default */
+    { 0, 1, HSV_ORANGE }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_default_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 1, HSV_ORANGE }
-);
+    /* Right lower */
+    { 0, 1, HSV_ORANGE }, { 1, 5, HSV_GREEN }, { 10, 1, HSV_CYAN }, { 15, 3, HSV_CYAN }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_lower_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 1, HSV_ORANGE },
-    { 1, 5, HSV_GREEN },
-    { 10, 1, HSV_CYAN },
-    { 15, 3, HSV_CYAN }
-);
+    /* Right raise */
+    { 0, 3, HSV_ORANGE }, { 6, 1, HSV_GOLDENROD }, { 7, 1, HSV_GOLD }, { 8, 1, HSV_YELLOW }, { 12, 1, HSV_GOLDENROD }, { 13, 1, HSV_GOLD }, { 14, 1, HSV_YELLOW }, RGBLIGHT_END_SEGMENTS,
 
-const rgblight_segment_t PROGMEM rgb_raise_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 3, HSV_ORANGE },
-    { 6, 1, HSV_GOLDENROD },
-    { 7, 1, HSV_GOLD },
-    { 8, 1, HSV_YELLOW },
-    { 12, 1, HSV_GOLDENROD },
-    { 13, 1, HSV_GOLD },
-    { 14, 1, HSV_YELLOW }
-);
+    /* Right adjust */
+    { 0, 1, HSV_ORANGE }, { 2, 3, HSV_GREEN }, { 8, 3, HSV_GREEN }, { 14, 3, HSV_GREEN }, { 17, 1, HSV_CHARTREUSE }, { 19, 2, HSV_GREEN }, RGBLIGHT_END_SEGMENTS,
+};
 
-const rgblight_segment_t PROGMEM rgb_adjust_layer_right[] = RGBLIGHT_LAYER_SEGMENTS(
-    { 0, 1, HSV_ORANGE },
-    { 2, 3, HSV_GREEN },
-    { 8, 3, HSV_GREEN },
-    { 14, 3, HSV_GREEN },
-    { 17, 1, HSV_CHARTREUSE },
-    { 19, 2, HSV_GREEN }
-);
+const rgblight_segment_t* const PROGMEM rgb_layers[] = {
+    /* Left layers */
+    &rgb_layer_definitions[0],
+    &rgb_layer_definitions[6],
+    &rgb_layer_definitions[10],
+    &rgb_layer_definitions[14],
+    &rgb_layer_definitions[20],
+    NULL,
 
-const rgblight_segment_t* const PROGMEM rgb_layers_right[] = RGBLIGHT_LAYERS_LIST(
-    rgb_fixed_layer_right,
-    rgb_default_layer_right,
-    rgb_lower_layer_right,
-    rgb_raise_layer_right,
-    rgb_adjust_layer_right
-);
+    /* Right layers */
+    &rgb_layer_definitions[25],
+    &rgb_layer_definitions[26],
+    &rgb_layer_definitions[28],
+    &rgb_layer_definitions[33],
+    &rgb_layer_definitions[41],
+    NULL,
+};
 
 bool sync_statuses[] = {
     [KB10UY_SY_NUMLOCK] = false,
@@ -184,11 +147,10 @@ const char code_to_name[60] = {
 // Common user actions --------------------------------------------------------
 
 void keyboard_post_init_user(void) {
-    rgblight_layers = (is_master) ? rgb_layers_left : rgb_layers_right;
+    rgblight_layers = (is_master) ? &rgb_layers[0] : &rgb_layers[6];
     update_lighting_layers(layer_state);
 }
 
-// Called before data sync
 void matrix_scan_user(void) {
     uint8_t sync = 0;
     sync |= sync_statuses[KB10UY_SY_NUMLOCK] << KB10UY_SY_NUMLOCK;
@@ -199,7 +161,6 @@ void matrix_scan_user(void) {
     transport_set_sync(sync);
 }
 
-// Called after data sync
 void matrix_slave_scan_user(void) {
     uint8_t sync = transport_get_sync();
     sync_statuses[KB10UY_SY_NUMLOCK] = sync & (1 << KB10UY_SY_NUMLOCK);
@@ -270,26 +231,22 @@ oled_rotation_t oled_init_user(oled_rotation_t rotation) {
 
 void oled_task_user(void) {
     if (is_master) {
-        oled_render_lock_state();
-        oled_render_layer_state();
-        oled_render_keylog();
+        oled_render_master();
     } else {
-        oled_render_logo();
+        oled_render_slave();
     }
 }
 
 // OLED user actions ----------------------------------------------------------
 
-void oled_render_lock_state(void) {
+void oled_render_master(void) {
+    uint8_t highest_layer = get_highest_layer(layer_state);
+
     oled_write_char('[', false);
     oled_write_char(sync_statuses[KB10UY_SY_NUMLOCK] ? 'N' : ' ', false);
     oled_write_char(sync_statuses[KB10UY_SY_CAPSLOCK] ? 'C' : ' ', false);
     oled_write_char(sync_statuses[KB10UY_SY_SCROLLLOCK] ? 'S' : ' ', false);
     oled_write_char(']', false);
-}
-
-void oled_render_layer_state(void) {
-    uint8_t highest_layer = get_highest_layer(layer_state);
 
     if (sync_statuses[KB10UY_SY_MACOS]) {
         oled_write_P(PSTR(" mac "), false);
@@ -311,48 +268,32 @@ void oled_render_layer_state(void) {
             oled_write_ln_P(PSTR("Adjust"), false);
             break;
     }
-}
 
-void set_keylog(uint16_t keycode, keyrecord_t *record) {
-  char name = ' ';
-    if ((keycode >= QK_MOD_TAP && keycode <= QK_MOD_TAP_MAX) ||
-        (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX)) { keycode = keycode & 0xFF; }
-  if (keycode < 60) {
-    name = code_to_name[keycode];
-  }
-
-  // update keylog
-  snprintf(keylog_str, sizeof(keylog_str), "%dx%d, k%2d : %c",
-           record->event.key.row, record->event.key.col,
-           keycode, name);
-}
-
-void oled_render_keylog(void) {
     oled_write(keylog_str, false);
 }
 
-void render_bootmagic_status(bool status) {
-    /* Show Ctrl-Gui Swap options */
-    static const char PROGMEM logo[][2][3] = {
-        {{0x97, 0x98, 0}, {0xb7, 0xb8, 0}},
-        {{0x95, 0x96, 0}, {0xb5, 0xb6, 0}},
-    };
-    if (status) {
-        oled_write_ln_P(logo[0][0], false);
-        oled_write_ln_P(logo[0][1], false);
-    } else {
-        oled_write_ln_P(logo[1][0], false);
-        oled_write_ln_P(logo[1][1], false);
-    }
-}
-
-void oled_render_logo(void) {
+void oled_render_slave(void) {
     static const char PROGMEM crkbd_logo[] = {
         0x80, 0x81, 0x82, 0x83, 0x84, 0x85, 0x86, 0x87, 0x88, 0x89, 0x8a, 0x8b, 0x8c, 0x8d, 0x8e, 0x8f, 0x90, 0x91, 0x92, 0x93, 0x94,
         0xa0, 0xa1, 0xa2, 0xa3, 0xa4, 0xa5, 0xa6, 0xa7, 0xa8, 0xa9, 0xaa, 0xab, 0xac, 0xad, 0xae, 0xaf, 0xb0, 0xb1, 0xb2, 0xb3, 0xb4,
         0xc0, 0xc1, 0xc2, 0xc3, 0xc4, 0xc5, 0xc6, 0xc7, 0xc8, 0xc9, 0xca, 0xcb, 0xcc, 0xcd, 0xce, 0xcf, 0xd0, 0xd1, 0xd2, 0xd3, 0xd4,
         0};
     oled_write_P(crkbd_logo, false);
+}
+
+void set_keylog(uint16_t keycode, keyrecord_t *record) {
+    char name = ' ';
+
+    if ((keycode >= QK_MOD_TAP && keycode <= QK_MOD_TAP_MAX) || (keycode >= QK_LAYER_TAP && keycode <= QK_LAYER_TAP_MAX)) {
+        keycode = keycode & 0xFF;
+    }
+    if (keycode < 60) {
+        name = code_to_name[keycode];
+    }
+
+    snprintf(keylog_str, sizeof(keylog_str), "%dx%d, k%2d : %c",
+             record->event.key.row, record->event.key.col,
+             keycode, name);
 }
 
 // User-defined functions -----------------------------------------------------

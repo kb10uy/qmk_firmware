@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #pragma once
 
 #include QMK_KEYBOARD_H
+#include "transport_ex.h"
 
 enum kb10uy_layers {
     _DEFAULT = 0,
@@ -47,12 +48,9 @@ enum kb10uy_sync_bit {
 
 #define TD_FN1 (TD(KB10UY_TD_FN1))
 
-void oled_render_lock_state(void);
-void oled_render_layer_state(void);
+void oled_render_master(void);
+void oled_render_slave(void);
 void set_keylog(uint16_t keycode, keyrecord_t *record);
-void oled_render_keylog(void);
-void render_bootmagic_status(bool status);
-void oled_render_logo(void);
 void update_lighting_layers(layer_state_t state);
 void toggle_recording(void);
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);
