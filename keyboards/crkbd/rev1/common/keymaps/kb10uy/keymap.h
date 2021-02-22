@@ -46,11 +46,21 @@ enum kb10uy_sync_bit {
     KB10UY_SY_MACOS,
 };
 
+typedef union {
+    uint32_t raw;
+    struct {
+        bool macos_enabled  :1;
+    };
+} kb10uy_persistent_t;
+
 #define TD_FN1 (TD(KB10UY_TD_FN1))
+#define EECONFIG_PERSISTENT ((uint32_t *) EECONFIG_SIZE)
 
 void oled_render_master(void);
 void oled_render_slave(void);
 void set_keylog(uint16_t keycode, keyrecord_t *record);
+void load_persistent(void);
+void save_persistent(void);
 void update_lighting_layers(layer_state_t state);
 void toggle_recording(void);
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data);

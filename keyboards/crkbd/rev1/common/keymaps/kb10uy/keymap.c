@@ -126,14 +126,6 @@ const rgblight_segment_t* const PROGMEM rgb_layers[] = {
     NULL,
 };
 
-bool sync_statuses[] = {
-    [KB10UY_SY_NUMLOCK] = false,
-    [KB10UY_SY_CAPSLOCK] = false,
-    [KB10UY_SY_SCROLLLOCK] = false,
-    [KB10UY_SY_RECORDING] = true,
-    [KB10UY_SY_MACOS] = false,
-};
-
 char keylog_str[24] = {};
 
 const char code_to_name[60] = {
@@ -144,10 +136,30 @@ const char code_to_name[60] = {
     'R', 'E', 'B', 'T', '_', '-', '=', '[', ']', '\\',
     '#', ';', '\'', '`', ',', '.', '/', ' ', ' ', ' '};
 
+bool sync_statuses[] = {
+    [KB10UY_SY_NUMLOCK] = false,
+    [KB10UY_SY_CAPSLOCK] = false,
+    [KB10UY_SY_SCROLLLOCK] = false,
+    [KB10UY_SY_RECORDING] = true,
+    [KB10UY_SY_MACOS] = false,
+};
+
+kb10uy_persistent_t persistent = {};
+
 // Common user actions --------------------------------------------------------
 
+void eeconfig_init_user(void) {
+    persistent.macos_enabled = false;
+    save_persistent();
+}
+
 void keyboard_post_init_user(void) {
-    rgblight_layers = (is_master) ? &rgb_layers[0] : &rgb_layers[6];
+    if (is_master) {
+        rgblight_layers = &rgb_layers[0];
+        load_persistent();
+    } else {
+        rgblight_layers = &rgb_layers[6];
+    }
     update_lighting_layers(layer_state);
 }
 
@@ -190,6 +202,7 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
         case K1_WIMA:
             if (record->event.pressed) {
                 sync_statuses[KB10UY_SY_MACOS] = !sync_statuses[KB10UY_SY_MACOS];
+                save_persistent();
             }
             break;
         case K1_ENG:
@@ -297,6 +310,18 @@ void set_keylog(uint16_t keycode, keyrecord_t *record) {
 }
 
 // User-defined functions -----------------------------------------------------
+
+void load_persistent(void) {
+    persistent.raw = eeprom_read_dword(EECONFIG_PERSISTENT);
+
+    sync_statuses[KB10UY_SY_MACOS] = persistent.macos_enabled;
+}
+
+void save_persistent(void) {
+    persistent.macos_enabled = sync_statuses[KB10UY_SY_MACOS];
+
+    eeprom_update_dword(EECONFIG_PERSISTENT, persistent.raw);
+}
 
 void update_lighting_layers(layer_state_t state) {
     rgblight_set_layer_state(0, true);
