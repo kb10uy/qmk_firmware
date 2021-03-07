@@ -347,13 +347,14 @@ void toggle_recording(void) {
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data) {
     layer_on(1);
 
-    switch (state->count) {
-        case 2:
-            register_code16(KC_LSFT);
-            break;
-        case TAPPING_TOGGLE:
-            lower_locked = !lower_locked;
-            break;
+    // Shift to Double Tap
+    if (state->count >= 2 && state->count < TAPPING_TOGGLE) {
+        register_code16(KC_LSFT);
+    }
+
+    /// Manual Tapping Toggle control
+    if (state->count == TAPPING_TOGGLE) {
+        lower_locked = !lower_locked;
     }
 }
 
@@ -362,12 +363,8 @@ void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data) {
         layer_off(1);
     }
 
-    switch (state->count) {
-        case 2:
-            unregister_code16(KC_LSFT);
-            break;
-        case TAPPING_TOGGLE:
-            // Nothing needed
-            break;
+    // Shift to Double Tap
+    if (state->count >= 2) {
+        unregister_code16(KC_LSFT);
     }
 }
