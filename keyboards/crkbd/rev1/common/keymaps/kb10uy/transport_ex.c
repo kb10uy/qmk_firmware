@@ -226,7 +226,16 @@ typedef struct _Serial_m2s_buffer_t {
 #    ifdef WPM_ENABLE
     uint8_t      current_wpm;
 #    endif
+    uint8_t      sync_data;
 } Serial_m2s_buffer_t;
+
+uint8_t transport_get_sync(void) {
+    return serial_m2s_buffer.sync_data;
+}
+
+void transport_set_sync(uint8_t data) {
+    serial_m2s_buffer.sync_data = data;
+}
 
 #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
 // When MCUs on both sides drive their respective RGB LED chains,
