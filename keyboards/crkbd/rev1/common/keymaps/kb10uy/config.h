@@ -75,3 +75,4 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
     21, 22, 23, 24, 25, 26 )
 
 #define TAPPING_TERM 175
+#define TAPPING_TOGGLE 3

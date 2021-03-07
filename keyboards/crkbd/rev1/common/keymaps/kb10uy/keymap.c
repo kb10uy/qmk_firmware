@@ -47,7 +47,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, XXXXXXX, XXXXXXX,   KC_F4,   KC_F5,   KC_F6,                      KC_LEFT, KC_DOWN,KC_RIGHT, KC_LBRC, KC_RBRC, KC_BSLS,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(3),  TD_FN1, KC_LGUI,    KC_RSFT, _______, _______
+                                            TT(3),  TD_FN1, KC_LGUI,    KC_RSFT,  K1_ENG,  K1_JPN
                                       //`--------------------------'  `--------------------------'
   ),
 
@@ -59,8 +59,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_LALT, XXXXXXX,  KC_F10,  KC_F11,  KC_F12,                      XXXXXXX, XXXXXXX, XXXXXXX,  KC_DEL,  KC_END, KC_PGDN,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(2),   MO(3), KC_LSFT,    KC_RSFT,  K1_ENG,  K1_JPN
+                                            MO(2), XXXXXXX, KC_LSFT,    KC_RSFT,  K1_ENG,  K1_JPN
                                       //`--------------------------'  `--------------------------'
+                                      // NOTE: Layer move from Raise to Adjust is prohibited
   ),
 
   [_ADJUST] = LAYOUT_split_3x6_3(
@@ -71,7 +72,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, RGB_HUD, RGB_SAD, RGB_VAD,RGB_RMOD, RGB_TOG,                      KC_NLCK,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-                                            MO(3),   MO(3), XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
+                                            TT(3), XXXXXXX, XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
                                       //`--------------------------'  `--------------------------'
   )
 };
@@ -143,6 +144,8 @@ bool sync_statuses[] = {
     [KB10UY_SY_RECORDING] = true,
     [KB10UY_SY_MACOS] = false,
 };
+
+bool lower_locked = false;
 
 kb10uy_persistent_t persistent = {};
 
@@ -344,15 +347,27 @@ void toggle_recording(void) {
 void dance_fn1_finished(qk_tap_dance_state_t *state, void *user_data) {
     layer_on(1);
 
-    if (state->count >= 2) {
-        register_code16(KC_LSFT);
+    switch (state->count) {
+        case 2:
+            register_code16(KC_LSFT);
+            break;
+        case TAPPING_TOGGLE:
+            lower_locked = !lower_locked;
+            break;
     }
 }
 
 void dance_fn1_reset(qk_tap_dance_state_t *state, void *user_data) {
-    layer_off(1);
+    if (!lower_locked) {
+        layer_off(1);
+    }
 
-    if (state->count >= 2) {
-        unregister_code16(KC_LSFT);
+    switch (state->count) {
+        case 2:
+            unregister_code16(KC_LSFT);
+            break;
+        case TAPPING_TOGGLE:
+            // Nothing needed
+            break;
     }
 }
