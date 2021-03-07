@@ -229,14 +229,6 @@ typedef struct _Serial_m2s_buffer_t {
     uint8_t      sync_data;
 } Serial_m2s_buffer_t;
 
-uint8_t transport_get_sync(void) {
-    return serial_m2s_buffer.sync_data;
-}
-
-void transport_set_sync(uint8_t data) {
-    serial_m2s_buffer.sync_data = data;
-}
-
 #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
 // When MCUs on both sides drive their respective RGB LED chains,
 // it is necessary to synchronize, so it is necessary to communicate RGB
@@ -285,6 +277,14 @@ SSTD_t transactions[] = {
 void transport_master_init(void) { soft_serial_initiator_init(transactions, TID_LIMIT(transactions)); }
 
 void transport_slave_init(void) { soft_serial_target_init(transactions, TID_LIMIT(transactions)); }
+
+uint8_t transport_get_sync(void) {
+    return serial_m2s_buffer.sync_data;
+}
+
+void transport_set_sync(uint8_t data) {
+    serial_m2s_buffer.sync_data = data;
+}
 
 #    if defined(RGBLIGHT_ENABLE) && defined(RGBLIGHT_SPLIT)
 
