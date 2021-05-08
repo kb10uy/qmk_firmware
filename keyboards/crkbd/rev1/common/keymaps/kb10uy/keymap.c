@@ -53,7 +53,7 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
   [_RAISE] = LAYOUT_split_3x6_3(
   //,-----------------------------------------------------.                    ,-----------------------------------------------------.
-      _______, K1_WIMA, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS,
+      _______, K1_WIMA, XXXXXXX,   TG(4), XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, KC_PSCR, KC_SLCK, KC_PAUS,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
       _______, KC_CAPS, XXXXXXX,   KC_F7,   KC_F8,   KC_F9,                      XXXXXXX, XXXXXXX, XXXXXXX,  KC_INS, KC_HOME, KC_PGUP,
   //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
@@ -74,6 +74,18 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
   //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                             TT(3), XXXXXXX, XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
                                       //`--------------------------'  `--------------------------'
+  ),
+
+  [_BLENDER] = LAYOUT_split_3x6_3(
+  //,-----------------------------------------------------.                    ,-----------------------------------------------------.
+       KC_ESC,    KC_D,    KC_F,    KC_E,    KC_N,    KC_U,                      XXXXXXX,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+       KC_TAB,    KC_G,    KC_R,    KC_S,    KC_A,    KC_V,                      XXXXXXX,   KC_P4,   KC_P5,   KC_P6, XXXXXXX, XXXXXXX,
+  //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
+      KC_LCTL,    KC_X,    KC_Y,    KC_Z,    KC_K,    KC_B,                      XXXXXXX,   KC_P1,   KC_P2,   KC_P3, KC_PENT,   TG(4),
+  //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+                                          XXXXXXX, XXXXXXX, KC_LSFT,    KC_PDOT,   KC_P0,  KC_SPC
+                                      //`--------------------------'  `--------------------------'
   )
 };
 
@@ -93,6 +105,9 @@ const rgblight_segment_t PROGMEM rgb_layer_definitions[] = {
     /* Left adjust */
     { 7, 4, HSV_PURPLE }, { 11, 1, HSV_RED }, { 13, 4, HSV_PURPLE }, { 17, 1, HSV_PINK }, RGBLIGHT_END_SEGMENTS,
 
+    /* Left Blender */
+    { 1, 3, HSV_YELLOW }, { 7, 3, HSV_PURPLE }, { 13, 1, HSV_RED }, { 14, 1, HSV_GREEN }, { 15, 1, HSV_BLUE }, RGBLIGHT_END_SEGMENTS,
+
     /* Right fixed */
     RGBLIGHT_END_SEGMENTS,
 
@@ -107,6 +122,9 @@ const rgblight_segment_t PROGMEM rgb_layer_definitions[] = {
 
     /* Right adjust */
     { 0, 1, HSV_ORANGE }, { 2, 3, HSV_GREEN }, { 8, 3, HSV_GREEN }, { 14, 3, HSV_GREEN }, { 17, 1, HSV_CHARTREUSE }, { 19, 2, HSV_GREEN }, RGBLIGHT_END_SEGMENTS,
+
+    /* Right Blender */
+    { 0, 1, HSV_ORANGE }, { 2, 3, HSV_GREEN }, { 8, 3, HSV_GREEN }, { 14, 3, HSV_GREEN }, { 17, 1, HSV_CHARTREUSE }, { 19, 2, HSV_GREEN }, RGBLIGHT_END_SEGMENTS,
 };
 
 const rgblight_segment_t* const PROGMEM rgb_layers[] = {
@@ -116,14 +134,16 @@ const rgblight_segment_t* const PROGMEM rgb_layers[] = {
     &rgb_layer_definitions[10],
     &rgb_layer_definitions[14],
     &rgb_layer_definitions[20],
+    &rgb_layer_definitions[25],
     NULL,
 
     /* Right layers */
-    &rgb_layer_definitions[25],
-    &rgb_layer_definitions[26],
-    &rgb_layer_definitions[28],
-    &rgb_layer_definitions[33],
-    &rgb_layer_definitions[41],
+    &rgb_layer_definitions[31],
+    &rgb_layer_definitions[32],
+    &rgb_layer_definitions[34],
+    &rgb_layer_definitions[39],
+    &rgb_layer_definitions[47],
+    &rgb_layer_definitions[54],
     NULL,
 };
 
@@ -161,7 +181,7 @@ void keyboard_post_init_user(void) {
         rgblight_layers = &rgb_layers[0];
         load_persistent();
     } else {
-        rgblight_layers = &rgb_layers[6];
+        rgblight_layers = &rgb_layers[7];
     }
     update_lighting_layers(layer_state);
 }
@@ -283,6 +303,9 @@ void oled_render_master(void) {
         case _ADJUST:
             oled_write_ln_P(PSTR("Adjust"), false);
             break;
+        case _BLENDER:
+            oled_write_ln_P(PSTR("Blender"), false);
+            break;
     }
 
     oled_write(keylog_str, false);
@@ -328,10 +351,11 @@ void save_persistent(void) {
 
 void update_lighting_layers(layer_state_t state) {
     rgblight_set_layer_state(0, true);
-    rgblight_set_layer_state(1, layer_state_cmp(state, 0) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(2, layer_state_cmp(state, 1) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(3, layer_state_cmp(state, 2) && !layer_state_cmp(state, 3));
-    rgblight_set_layer_state(4, layer_state_cmp(state, 3));
+    rgblight_set_layer_state(1, layer_state_cmp(state, _DEFAULT) && !layer_state_cmp(state, _ADJUST));
+    rgblight_set_layer_state(2, layer_state_cmp(state, _LOWER) && !layer_state_cmp(state, _ADJUST));
+    rgblight_set_layer_state(3, layer_state_cmp(state, _RAISE) && !layer_state_cmp(state, _ADJUST));
+    rgblight_set_layer_state(4, layer_state_cmp(state, _ADJUST));
+    rgblight_set_layer_state(5, layer_state_cmp(state, _BLENDER));
 }
 
 void toggle_recording(void) {

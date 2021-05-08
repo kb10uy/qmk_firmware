@@ -25,6 +25,7 @@ enum kb10uy_layers {
     _LOWER,
     _RAISE,
     _ADJUST,
+    _BLENDER,
 };
 
 enum kb10uy_key_code {
