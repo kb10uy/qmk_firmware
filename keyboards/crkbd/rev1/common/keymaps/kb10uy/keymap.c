@@ -166,6 +166,7 @@ bool sync_statuses[] = {
 };
 
 bool lower_locked = false;
+bool is_left = false;
 
 kb10uy_persistent_t persistent = {};
 
@@ -177,7 +178,8 @@ void eeconfig_init_user(void) {
 }
 
 void keyboard_post_init_user(void) {
-    if (is_master) {
+    is_left = is_keyboard_left();
+    if (is_left) {
         rgblight_layers = &rgb_layers[0];
         load_persistent();
     } else {
@@ -259,14 +261,14 @@ bool led_update_user(led_t led_state) {
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    if (!is_master) {
+    if (!is_left) {
         return OLED_ROTATION_180;  // flips the display 180 degrees if offhand
     }
     return rotation;
 }
 
 void oled_task_user(void) {
-    if (is_master) {
+    if (is_left) {
         oled_render_master();
     } else {
         oled_render_slave();
