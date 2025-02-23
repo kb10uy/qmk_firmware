@@ -131,6 +131,9 @@ int  lang_keys[]  = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
 void keyboard_post_init_user(void) {
     is_left   = is_keyboard_left();
     is_parent = is_keyboard_master();
+    os_mode   = K1_WINDOWS;
+
+    update_os_mode_setting();
 }
 
 oled_rotation_t oled_init_user(oled_rotation_t rotation) {
@@ -146,13 +149,10 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
                 toggle_recording();
             }
             break;
-        case K1_WIMA:
-            if (record->event.pressed) {
-                sync_statuses[KB10UY_SY_MACOS] = !sync_statuses[KB10UY_SY_MACOS];
-                save_persistent();
-            }
-            break;
         */
+        case K1_CHOS:
+            if (record->event.pressed) change_next_os_mode();
+            break;
         case K1_ENG:
             if (record->event.pressed) {
                 register_code(lang_keys[0]);
@@ -169,6 +169,34 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
             break;
     }
     return true;
+}
+
+// Features -------------------------------------------------------------------
+
+void change_next_os_mode(void) {
+    os_mode = (os_mode + 1) % K1_OS_MAX;
+    update_os_mode_setting();
+}
+
+void update_os_mode_setting(void) {
+    switch (os_mode) {
+        case K1_WINDOWS:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+        case K1_MACOS:
+            lang_keys[0] = KC_LANGUAGE_2;
+            lang_keys[1] = KC_LANGUAGE_1;
+            break;
+        case K1_LINUX:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+        case K1_ANDROID:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+    }
 }
 
 // Tap Dance ------------------------------------------------------------------

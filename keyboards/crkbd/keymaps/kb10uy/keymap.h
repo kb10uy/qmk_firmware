@@ -44,6 +44,7 @@ enum kb10uy_os_mode {
     K1_MACOS,
     K1_LINUX,
     K1_ANDROID,
+    K1_OS_MAX,
 };
 
 // Keycode Macros -------------------------------------------------------------
@@ -57,6 +58,8 @@ enum kb10uy_os_mode {
 void keyboard_post_init_user(void);
 oled_rotation_t oled_init_user(oled_rotation_t rotation);
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
+void change_next_os_mode(void);
+void update_os_mode_setting(void);
 void dance_fn1_finished(tap_dance_state_t *state, void *user_data);
 void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
 bool oled_task_user(void);
