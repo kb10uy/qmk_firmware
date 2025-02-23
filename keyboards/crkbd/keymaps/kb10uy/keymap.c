@@ -206,6 +206,7 @@ bool oled_render_info(void) {
 }
 
 bool oled_render_logo(void) {
-    oled_write_P(crkbd_logo, false);
+#include "logo_data.h"
+    oled_write_raw_P(logo_data, sizeof(logo_data));
     return false;
 }
