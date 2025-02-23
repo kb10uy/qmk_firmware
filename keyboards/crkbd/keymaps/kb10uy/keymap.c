@@ -81,6 +81,31 @@ static const char PROGMEM logo_text[] = {
     0x00,
 };
 
+static const char PROGMEM status_text[] = {
+    // Caps Lock (0, 4, 8)
+    0x93, 0x94, 0x95, 0x00,
+    0xB3, 0xB4, 0xB5, 0x00,
+    0xD3, 0xD4, 0xD5, 0x00,
+    // Num Lock (12, 16, 20)
+    0x96, 0x97, 0x98, 0x00,
+    0xB6, 0xB7, 0xB8, 0x00,
+    0xD6, 0xD7, 0xD8, 0x00,
+    // Scroll Lock (24, 28, 32)
+    0x99, 0x9A, 0x9B, 0x00,
+    0xB9, 0xBA, 0xBB, 0x00,
+    0xD9, 0xDA, 0xDB, 0x00,
+    // Blank (36, 40, 44)
+    0x20, 0x20, 0x20, 0x00,
+    0x20, 0x20, 0x20, 0x00,
+    0x20, 0x20, 0x20, 0x00,
+    // Windows (48, 51)
+    0x9C, 0x9D, 0x00,
+    0xBC, 0xBD, 0x00,
+    // macOS (54, 57)
+    0x9E, 0x9F, 0x00,
+    0xBE, 0xBF, 0x00,
+};
+
 // clang-format on
 
 tap_dance_action_t tap_dance_actions[] = {
@@ -90,11 +115,11 @@ tap_dance_action_t tap_dance_actions[] = {
 
 // Per-side States ------------------------------------------------------------
 
-bool is_left            = false;
-bool is_parent          = false;
-bool lower_locked       = false;
-int  lang_keys[]        = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
-char oled_status_text[] = "[_|_|_|_] _";
+bool is_left      = false;
+bool is_parent    = false;
+bool lower_locked = false;
+bool is_macos     = false;
+int  lang_keys[]  = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
 
 // Keyboard Events ------------------------------------------------------------
 
@@ -179,17 +204,30 @@ bool oled_task_user(void) {
 }
 
 bool oled_render_info(void) {
-    uint8_t highest_layer = get_highest_layer(layer_state);
+    // uint8_t highest_layer = get_highest_layer(layer_state);
     led_t   led           = host_keyboard_led_state();
 
-    // TODO: Windows / macOS で表示を分ける
-    oled_status_text[1] = 'W';
-
     // Lock LEDs
-    oled_status_text[3] = led.num_lock ? 'N' : '_';
-    oled_status_text[5] = led.num_lock ? 'N' : '_';
-    oled_status_text[7] = led.num_lock ? 'N' : '_';
+    int num_index    = led.num_lock ? 12 : 36;
+    int caps_index   = led.caps_lock ? 0 : 36;
+    int scroll_index = led.scroll_lock ? 24 : 36;
+    for (int row = 0; row < 3; ++row) {
+        int row_offset = row * 4;
+        oled_set_cursor(0, row);
+        oled_write_P(status_text + num_index + row_offset, false);
+        oled_write_P(status_text + caps_index + row_offset, false);
+        oled_write_P(status_text + scroll_index + row_offset, false);
+    }
 
+    // Windows / macOS
+    int os_index = is_macos ? 54 : 48;
+    for (int row = 0; row < 2; ++row) {
+        int row_offset = row * 3;
+        oled_set_cursor(10, row);
+        oled_write_P(status_text + os_index + row_offset, false);
+    }
+
+    /*
     // Layer Symbols
     switch (highest_layer) {
         case _DEFAULT:
@@ -205,8 +243,8 @@ bool oled_render_info(void) {
             oled_status_text[10] = 'A';
             break;
     }
-
     oled_write(oled_status_text, false);
+    */
     return false;
 }
 

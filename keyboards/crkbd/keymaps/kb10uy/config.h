@@ -40,7 +40,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // OLED Font
 #ifdef OLED_FONT_H
 #    undef OLED_FONT_H
-#    define OLED_FONT_H "keyboards/crkbd/keymaps/kb10uy/glcdfont.c"
 #endif
+#define OLED_FONT_H "keyboards/crkbd/keymaps/kb10uy/glcdfont.c"
 
 // #define USE_MATRIX_I2C
