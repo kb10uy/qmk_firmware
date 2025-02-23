@@ -30,13 +30,20 @@ enum kb10uy_layer {
 
 enum kb10uy_key_code {
     K1_OLED = SAFE_RANGE,
-    K1_WIMA,
+    K1_CHOS,
     K1_JPN,
     K1_ENG,
 };
 
 enum kb10uy_tap_dance {
     KB10UY_TD_FN1 = 0,
+};
+
+enum kb10uy_os_mode {
+    K1_WINDOWS = 0,
+    K1_MACOS,
+    K1_LINUX,
+    K1_ANDROID,
 };
 
 // Keycode Macros -------------------------------------------------------------
