@@ -1,6 +1,7 @@
 # Build
 LTO_ENABLE          = yes
 CONSOLE_ENABLE      = no
+PIN_COMPATIBLE 		= promicro
 
 # Keyboard
 MOUSEKEY_ENABLE     = no
