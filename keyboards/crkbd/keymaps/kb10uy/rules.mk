@@ -1,7 +1,12 @@
-
-MOUSEKEY_ENABLE     = no
-RGBLIGHT_ENABLE     = no
-OLED_DRIVER_ENABLE  = yes
-TAP_DANCE_ENABLE    = yes
+# Build
 LTO_ENABLE          = yes
 CONSOLE_ENABLE      = no
+
+# Keyboard
+MOUSEKEY_ENABLE     = no
+TAP_DANCE_ENABLE    = yes
+
+# Cosmetic
+OLED_DRIVER_ENABLE  = yes
+RGBLIGHT_ENABLE     = no
+RGB_MATRIX_ENABLE 	= no
