@@ -48,6 +48,7 @@ enum kb10uy_tap_dance {
 // Function Declarations ------------------------------------------------------
 
 void keyboard_post_init_user(void);
+oled_rotation_t oled_init_user(oled_rotation_t rotation);
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
 void dance_fn1_finished(tap_dance_state_t *state, void *user_data);
 void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
