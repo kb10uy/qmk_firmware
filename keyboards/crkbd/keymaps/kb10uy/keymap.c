@@ -202,10 +202,10 @@ bool oled_render_info(void) {
     }
 
     oled_write(oled_status_text, false);
-    return true;
+    return false;
 }
 
 bool oled_render_logo(void) {
     oled_write_P(crkbd_logo, false);
-    return true;
+    return false;
 }
