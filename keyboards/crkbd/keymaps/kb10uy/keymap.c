@@ -136,11 +136,6 @@ void keyboard_post_init_user(void) {
     update_os_mode_setting();
 }
 
-oled_rotation_t oled_init_user(oled_rotation_t rotation) {
-    // is_left not initialized yet
-    return is_keyboard_left() ? OLED_ROTATION_0 : OLED_ROTATION_180;
-}
-
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
         /*
@@ -227,6 +222,11 @@ void dance_fn1_reset(tap_dance_state_t *state, void *user_data) {
 }
 
 // OLED -----------------------------------------------------------------------
+
+oled_rotation_t oled_init_user(oled_rotation_t rotation) {
+    // is_left not initialized yet
+    return is_keyboard_left() ? OLED_ROTATION_0 : OLED_ROTATION_180;
+}
 
 bool oled_task_user(void) {
     if (is_parent) {
