@@ -49,9 +49,12 @@ enum kb10uy_os_mode {
 typedef union {
     uint32_t raw;
     struct {
+        uint8_t config_version;
         uint8_t os_mode;
     };
 } kb10uy_config_t;
+
+#define KB10UY_CONFIG_VERSION ((uint8_t)1)
 
 // Keycode Macros -------------------------------------------------------------
 
@@ -61,15 +64,22 @@ typedef union {
 
 // Function Declarations ------------------------------------------------------
 
-void            keyboard_post_init_user(void);
+// Keyboard Events
+void keyboard_post_init_user(void);
+bool process_record_user(uint16_t keycode, keyrecord_t *record);
+
+// Features
+void change_next_os_mode(void);
+void update_os_mode_setting(void);
+void load_sync_config(void);
+void sync_save_config(void);
+
+// Tap Dance
+void dance_fn1_finished(tap_dance_state_t *state, void *user_data);
+void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
+
+// OLED
 oled_rotation_t oled_init_user(oled_rotation_t rotation);
-bool            process_record_user(uint16_t keycode, keyrecord_t *record);
-void            change_next_os_mode(void);
-void            update_os_mode_setting(void);
-void            load_sync_config(void);
-void            sync_save_config(void);
-void            dance_fn1_finished(tap_dance_state_t *state, void *user_data);
-void            dance_fn1_reset(tap_dance_state_t *state, void *user_data);
 bool            oled_task_user(void);
 bool            oled_render_info(void);
 bool            oled_render_logo(void);

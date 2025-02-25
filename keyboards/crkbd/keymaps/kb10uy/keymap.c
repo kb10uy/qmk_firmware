@@ -120,8 +120,7 @@ tap_dance_action_t tap_dance_actions[] = {
 
 // Per-side States ------------------------------------------------------------
 
-kb10uy_config_t config  = {0};
-uint8_t         os_mode = K1_WINDOWS;
+kb10uy_config_t config = {0};
 
 bool    is_left      = false;
 bool    is_parent    = false;
@@ -136,6 +135,13 @@ void keyboard_post_init_user(void) {
     is_left   = is_keyboard_left();
     is_parent = is_keyboard_master();
     update_os_mode_setting();
+}
+
+void eeconfig_init_user(void) {
+    config.config_version = KB10UY_CONFIG_VERSION;
+    config.os_mode        = K1_WINDOWS;
+
+    eeconfig_update_user(config.raw);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -164,12 +170,13 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
 // Features -------------------------------------------------------------------
 
 void change_next_os_mode(void) {
-    os_mode = (os_mode + 1) % K1_OS_MAX;
+    config.os_mode = (config.os_mode + 1) % K1_OS_MAX;
     update_os_mode_setting();
+    sync_save_config();
 }
 
 void update_os_mode_setting(void) {
-    switch (os_mode) {
+    switch (config.os_mode) {
         case K1_WINDOWS:
             lang_keys[0] = KC_INTERNATIONAL_5;
             lang_keys[1] = KC_INTERNATIONAL_4;
@@ -191,11 +198,12 @@ void update_os_mode_setting(void) {
 
 void load_sync_config(void) {
     config.raw = eeconfig_read_user();
-    os_mode    = config.os_mode;
+
+    // Initialize config if saved version is older than current
+    if (config.config_version < KB10UY_CONFIG_VERSION) eeconfig_init_user();
 }
 
 void sync_save_config(void) {
-    config.os_mode = os_mode;
     eeconfig_update_user(config.raw);
 }
 
@@ -258,7 +266,7 @@ bool oled_render_info(void) {
     }
 
     // Windows / macOS
-    int os_index = 48 + os_mode * 6;
+    int os_index = 48 + config.os_mode * 6;
     for (int row = 0; row < 2; ++row) {
         int row_offset = row * 3;
         oled_set_cursor(10, row);
