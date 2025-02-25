@@ -63,9 +63,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //,-----------------------------------------------------.                    ,-----------------------------------------------------.
         _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
     //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-        _______, RGB_HUI, RGB_SAI, RGB_VAI, RGB_MOD, K1_OLED,                      KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
     //|--------+--------+--------+--------+--------+--------|                    |--------+--------+--------+--------+--------+--------|
-        _______, RGB_HUD, RGB_SAD, RGB_VAD,RGB_RMOD, RGB_TOG,                       KC_NUM,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                       KC_NUM,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
     //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
                                              TT_ADJ, XXXXXXX, XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
                                         //`--------------------------'  `--------------------------'
@@ -120,31 +120,26 @@ tap_dance_action_t tap_dance_actions[] = {
 
 // Per-side States ------------------------------------------------------------
 
-bool is_left      = false;
-bool is_parent    = false;
-bool lower_locked = false;
-int  os_mode      = K1_WINDOWS;
-int  lang_keys[]  = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
+kb10uy_config_t config  = {0};
+uint8_t         os_mode = K1_WINDOWS;
+
+bool    is_left      = false;
+bool    is_parent    = false;
+bool    lower_locked = false;
+uint8_t lang_keys[]  = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
 
 // Keyboard Events ------------------------------------------------------------
 
 void keyboard_post_init_user(void) {
+    load_sync_config();
+
     is_left   = is_keyboard_left();
     is_parent = is_keyboard_master();
-    os_mode   = K1_WINDOWS;
-
     update_os_mode_setting();
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     switch (keycode) {
-        /*
-        case K1_OLED:
-            if (record->event.pressed) {
-                toggle_recording();
-            }
-            break;
-        */
         case K1_CHOS:
             if (record->event.pressed) change_next_os_mode();
             break;
@@ -192,6 +187,16 @@ void update_os_mode_setting(void) {
             lang_keys[1] = KC_INTERNATIONAL_4;
             break;
     }
+}
+
+void load_sync_config(void) {
+    config.raw = eeconfig_read_user();
+    os_mode    = config.os_mode;
+}
+
+void sync_save_config(void) {
+    config.os_mode = os_mode;
+    eeconfig_update_user(config.raw);
 }
 
 // Tap Dance ------------------------------------------------------------------
