@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
 
 
+#include "keycodes.h"
 #include QMK_KEYBOARD_H
 #include "lib/add_keycodes.h"
 
@@ -22,10 +23,10 @@ Physical Mapping:
               [Rd]
         [Ml]        [Mr]
 
-          [Ki][Ke][Ka]
-     [S3] [Kj](Kf)[Kb] [S1]
-     [S4] [Kk][Kg][Kc] [S2]
-          [Kl](Kh)[Kd]
+          [Ki](Ke)[Ka]
+     [S3] [Kj][Kf][Kb] [S1]
+     [S4] [Kk](Kg)[Kc] [S2]
+          [Kl][Kh][Kd]
               <XC>
 
           [B1]
@@ -55,29 +56,29 @@ Layout Order:
 ----------------------------------------
 Rotary Encoder CW Orientation:
     Rp: l>u>r>d
-    Kf: Kb>Kj
-    Kh: Kg>XC
+    Ke: Ka>Ki
+    Kg: Kf>Xh
 ----------------------------------------
 */
 
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [BASE] = LAYOUT(
         // キースイッチ、クリックボタン
-        KC_A, KC_B, KC_C, KC_D,
-        KC_E, KC_F, KC_G, KC_H,
-        KC_I, KC_J, KC_K, KC_L,
+        KC_RIGHT, KC_DOWN,  KC_LEFT,  XXXXXXX,
+        XXXXXXX,  KC_UP,    XXXXXXX,  MS_BTN3,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
         // ロータリーエンコーダー
-        KC_M, KC_N, KC_O, KC_P,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,  XXXXXXX,
         // マウスボタン
-        KC_Q, KC_R,
+        MS_BTN1,  MS_BTN2,
         // レバーボタン
-        KC_S, KC_T, KC_U,
-        KC_V, KC_W, KC_X,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,
         // 側面ボタン
-        KC_1, KC_2,
-        KC_3, KC_4,
+        XXXXXXX,  XXXXXXX,
+        XXXXXXX,  XXXXXXX,
         // 背面ボタン
-        KC_5, KC_6, KC_7,
+        XXXXXXX,  XXXXXXX,  XXXXXXX,
         // スライドスイッチ
         MO(5),
         // センタープッシュ（無効）
@@ -153,9 +154,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
     [BASE] =   {
-        ENCODER_CCW_CW(KC_1,   KC_2),
-        ENCODER_CCW_CW(KC_3,   KC_4),
-        ENCODER_CCW_CW(KC_5,   KC_6)
+        ENCODER_CCW_CW(XXXXXXX,  XXXXXXX),
+        ENCODER_CCW_CW(MS_WHLD,  MS_WHLU),
+        ENCODER_CCW_CW(MS_WHLL,  MS_WHLR)
     },
     [TEMPLATE_BLANK] =   {
         ENCODER_CCW_CW(XXXXXXX, XXXXXXX),
