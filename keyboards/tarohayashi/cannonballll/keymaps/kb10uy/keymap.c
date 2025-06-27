@@ -156,7 +156,7 @@ const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
     [BASE] =   {
         ENCODER_CCW_CW(XXXXXXX,  XXXXXXX),
         ENCODER_CCW_CW(MS_WHLD,  MS_WHLU),
-        ENCODER_CCW_CW(MS_WHLL,  MS_WHLR)
+        ENCODER_CCW_CW(MS_WHLR,  MS_WHLL)
     },
     [TEMPLATE_BLANK] =   {
         ENCODER_CCW_CW(XXXXXXX, XXXXXXX),
