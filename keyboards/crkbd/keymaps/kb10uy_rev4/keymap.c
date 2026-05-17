@@ -80,7 +80,8 @@ tap_dance_action_t tap_dance_actions[] = {
 
 kb10uy_config_t config = {0};
 
-uint8_t lang_keys[] = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
+uint8_t       lang_keys[]      = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
+layer_state_t layer_lock_state = 0;
 
 static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t index = g_led_config.matrix_co[row][col];
@@ -177,16 +178,25 @@ void dance_fn1_finished(tap_dance_state_t *state, void *user_data) {
 }
 
 void dance_fn1_reset(tap_dance_state_t *state, void *user_data) {
-    layer_off(1);
+    bool lower_layer_locked = (layer_lock_state & (1UL << _LOWER)) != 0;
+    if (!lower_layer_locked) {
+        layer_off(_LOWER);
+    }
 
     if (state->count >= 2) {
         unregister_code16(KC_LSFT);
     }
 }
 
+bool layer_lock_set_user(layer_state_t locked_layers) {
+    layer_lock_state = locked_layers;
+    return true;
+}
+
 bool rgb_matrix_indicators_user(void) {
     led_t   led           = host_keyboard_led_state();
     uint8_t highest_layer = get_highest_layer(layer_state);
+    bool    layer_locked  = (layer_lock_state & (1UL << highest_layer)) != 0;
 
     // Left extra upper key: OS indicator ([0, 6])
     set_indicator_key_color(0, 6, 0, 0, 0);
@@ -216,13 +226,13 @@ bool rgb_matrix_indicators_user(void) {
 
     switch (highest_layer) {
         case _LOWER:
-            set_indicator_key_color(1, 6, 255, 96, 96);
+            set_indicator_key_color(1, 6, layer_locked ? 255 : 96, layer_locked ? 128 : 24, layer_locked ? 128 : 24);
             break;
         case _RAISE:
-            set_indicator_key_color(1, 6, 96, 144, 255);
+            set_indicator_key_color(1, 6, layer_locked ? 128 : 24, layer_locked ? 160 : 48, layer_locked ? 255 : 96);
             break;
         case _ADJUST:
-            set_indicator_key_color(1, 6, 192, 128, 255);
+            set_indicator_key_color(1, 6, layer_locked ? 224 : 64, layer_locked ? 160 : 32, layer_locked ? 255 : 96);
             break;
         default:
             set_indicator_key_color(1, 6, 0, 0, 0);

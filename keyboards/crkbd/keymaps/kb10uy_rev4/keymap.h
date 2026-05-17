@@ -80,3 +80,6 @@ void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
 
 // RGB Matrix
 bool rgb_matrix_indicators_user(void);
+
+// Layer Lock
+bool layer_lock_set_user(layer_state_t locked_layers);
