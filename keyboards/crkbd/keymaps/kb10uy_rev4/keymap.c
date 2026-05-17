@@ -191,39 +191,44 @@ bool rgb_matrix_indicators_user(void) {
     led_t   led           = host_keyboard_led_state();
     uint8_t highest_layer = get_highest_layer(layer_state);
 
+    // Left extra upper key: OS indicator ([0, 6])
+    set_indicator_key_color(0, 6, 0, 0, 0);
+    // Left extra lower key: Layer indicator ([1, 6])
+    set_indicator_key_color(1, 6, 0, 0, 0);
+    // Right extra lower key: Num Lock indicator ([5, 6])
+    set_indicator_key_color(5, 6, 0, 0, 0);
+
     if (led.num_lock) {
-        set_indicator_key_color(2, 5, 255, 180, 0);
-        set_indicator_key_color(6, 5, 255, 180, 0);
+        set_indicator_key_color(5, 6, 255, 180, 0);
     }
 
     switch (config.os_mode) {
         case K1_WINDOWS:
-            set_indicator_key_color(0, 3, 0, 120, 255);
+            set_indicator_key_color(0, 6, 0, 120, 255);
             break;
         case K1_MACOS:
-            set_indicator_key_color(0, 3, 255, 255, 255);
+            set_indicator_key_color(0, 6, 255, 255, 255);
             break;
         case K1_LINUX:
-            set_indicator_key_color(0, 3, 255, 80, 0);
+            set_indicator_key_color(0, 6, 255, 80, 0);
             break;
         case K1_ANDROID:
-            set_indicator_key_color(0, 3, 0, 220, 80);
+            set_indicator_key_color(0, 6, 0, 220, 80);
             break;
     }
 
     switch (highest_layer) {
         case _LOWER:
-            set_indicator_key_color(3, 4, 160, 0, 255);
+            set_indicator_key_color(1, 6, 255, 96, 96);
             break;
         case _RAISE:
-            set_indicator_key_color(3, 3, 0, 200, 255);
+            set_indicator_key_color(1, 6, 96, 144, 255);
             break;
         case _ADJUST:
-            set_indicator_key_color(3, 4, 255, 0, 40);
-            set_indicator_key_color(3, 3, 255, 0, 40);
+            set_indicator_key_color(1, 6, 192, 128, 255);
             break;
         default:
-            set_indicator_key_color(3, 4, 0, 160, 80);
+            set_indicator_key_color(1, 6, 0, 0, 0);
             break;
     }
 
