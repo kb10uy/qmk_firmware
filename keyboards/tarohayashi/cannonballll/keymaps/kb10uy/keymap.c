@@ -155,8 +155,8 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 const uint16_t PROGMEM encoder_map[][NUM_ENCODERS][2] = {
     [BASE] =   {
         ENCODER_CCW_CW(XXXXXXX,  XXXXXXX),
-        ENCODER_CCW_CW(MS_WHLD,  MS_WHLU),
-        ENCODER_CCW_CW(MS_WHLR,  MS_WHLL)
+        ENCODER_CCW_CW(XXXXXXX,  XXXXXXX),
+        ENCODER_CCW_CW(XXXXXXX,  XXXXXXX)
     },
     [TEMPLATE_BLANK] =   {
         ENCODER_CCW_CW(XXXXXXX, XXXXXXX),
