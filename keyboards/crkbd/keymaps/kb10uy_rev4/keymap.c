@@ -80,8 +80,7 @@ tap_dance_action_t tap_dance_actions[] = {
 
 kb10uy_config_t config = {0};
 
-bool    lower_locked = false;
-uint8_t lang_keys[]  = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
+uint8_t lang_keys[] = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
 
 static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t index = g_led_config.matrix_co[row][col];
@@ -168,19 +167,17 @@ void sync_save_config(void) {
 void dance_fn1_finished(tap_dance_state_t *state, void *user_data) {
     layer_on(1);
 
-    if (state->count >= 2 && state->count < TAPPING_TOGGLE) {
+    if (state->count >= 2 /* && state->count < TAPPING_TOGGLE */) {
         register_code16(KC_LSFT);
     }
 
-    if (state->count == TAPPING_TOGGLE) {
-        lower_locked = !lower_locked;
-    }
+    // if (state->count == TAPPING_TOGGLE) {
+    //     lower_locked = !lower_locked;
+    // }
 }
 
 void dance_fn1_reset(tap_dance_state_t *state, void *user_data) {
-    if (!lower_locked) {
-        layer_off(1);
-    }
+    layer_off(1);
 
     if (state->count >= 2) {
         unregister_code16(KC_LSFT);
