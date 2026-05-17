@@ -33,4 +33,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define TAPPING_TERM 175
 #define TAPPING_TOGGLE 5
 
+// RGB Matrix
+#define RGB_MATRIX_DEFAULT_MODE RGB_MATRIX_SOLID_COLOR
+
 // #define USE_MATRIX_I2C
