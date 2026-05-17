@@ -63,9 +63,9 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
         _______,  EE_CLR, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, K1_CHOS,    XXXXXXX, KC_PAST,   KC_P7,   KC_P8,   KC_P9, KC_PMNS, KC_BSPC,
     //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
-        _______, RM_NEXT, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, QK_LLCK,     KC_NUM, KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
+        _______, RM_NEXT, RM_VALU, XXXXXXX, XXXXXXX, XXXXXXX, QK_LLCK,     KC_NUM, KC_PSLS,   KC_P4,   KC_P5,   KC_P6, KC_PPLS, XXXXXXX,
     //|--------+--------+--------+--------+--------+--------|--------'  `--------+--------+--------+--------+--------+--------+--------|
-        _______, RM_TOGG, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
+        _______, RM_TOGG, RM_VALD, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
     //`--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------'
                                              TT_ADJ, XXXXXXX, XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
                                         //`--------------------------'  `--------------------------'
@@ -206,21 +206,21 @@ bool rgb_matrix_indicators_user(void) {
     set_indicator_key_color(5, 6, 0, 0, 0);
 
     if (led.num_lock) {
-        set_indicator_key_color(5, 6, 255, 180, 0);
+        set_indicator_key_color(5, 6, 96, 64, 0);
     }
 
     switch (config.os_mode) {
         case K1_WINDOWS:
-            set_indicator_key_color(0, 6, 0, 120, 255);
+            set_indicator_key_color(0, 6, 0, 48, 96);
             break;
         case K1_MACOS:
-            set_indicator_key_color(0, 6, 255, 255, 255);
+            set_indicator_key_color(0, 6, 96, 96, 96);
             break;
         case K1_LINUX:
-            set_indicator_key_color(0, 6, 255, 80, 0);
+            set_indicator_key_color(0, 6, 96, 32, 0);
             break;
         case K1_ANDROID:
-            set_indicator_key_color(0, 6, 0, 220, 80);
+            set_indicator_key_color(0, 6, 0, 88, 32);
             break;
     }
 
