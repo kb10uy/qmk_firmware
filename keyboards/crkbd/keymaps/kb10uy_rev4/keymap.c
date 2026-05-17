@@ -206,33 +206,33 @@ bool rgb_matrix_indicators_user(void) {
     set_indicator_key_color(5, 6, 0, 0, 0);
 
     if (led.num_lock) {
-        set_indicator_key_color(5, 6, 96, 64, 0);
+        set_indicator_key_color(5, 6, 24, 16, 0);
     }
 
     switch (config.os_mode) {
         case K1_WINDOWS:
-            set_indicator_key_color(0, 6, 0, 48, 96);
+            set_indicator_key_color(0, 6, 0, 12, 24);
             break;
         case K1_MACOS:
-            set_indicator_key_color(0, 6, 96, 96, 96);
+            set_indicator_key_color(0, 6, 24, 24, 24);
             break;
         case K1_LINUX:
-            set_indicator_key_color(0, 6, 96, 32, 0);
+            set_indicator_key_color(0, 6, 24, 8, 0);
             break;
         case K1_ANDROID:
-            set_indicator_key_color(0, 6, 0, 88, 32);
+            set_indicator_key_color(0, 6, 0, 22, 8);
             break;
     }
 
     switch (highest_layer) {
         case _LOWER:
-            set_indicator_key_color(1, 6, layer_locked ? 255 : 96, layer_locked ? 128 : 24, layer_locked ? 128 : 24);
+            set_indicator_key_color(1, 6, layer_locked ? 255 : 24, layer_locked ? 128 : 6, layer_locked ? 128 : 6);
             break;
         case _RAISE:
-            set_indicator_key_color(1, 6, layer_locked ? 128 : 24, layer_locked ? 160 : 48, layer_locked ? 255 : 96);
+            set_indicator_key_color(1, 6, layer_locked ? 128 : 6, layer_locked ? 160 : 12, layer_locked ? 255 : 24);
             break;
         case _ADJUST:
-            set_indicator_key_color(1, 6, layer_locked ? 224 : 64, layer_locked ? 160 : 32, layer_locked ? 255 : 96);
+            set_indicator_key_color(1, 6, layer_locked ? 224 : 16, layer_locked ? 160 : 8, layer_locked ? 255 : 24);
             break;
         default:
             set_indicator_key_color(1, 6, 0, 0, 0);
