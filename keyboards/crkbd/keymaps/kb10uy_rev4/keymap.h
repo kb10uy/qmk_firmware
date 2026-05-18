@@ -17,9 +17,11 @@ You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#pragma once
 #include QMK_KEYBOARD_H
+#include "transactions.h"
 
-// Enums ----------------------------------------------------------------------
+// Types ----------------------------------------------------------------------
 
 enum kb10uy_layer {
     _DEFAULT = 0,
@@ -54,6 +56,11 @@ typedef union {
     };
 } kb10uy_config_t;
 
+typedef struct {
+    uint8_t       os_mode;
+    layer_state_t locked_layers;
+} kb10uy_sync_state_t;
+
 #define KB10UY_CONFIG_VERSION ((uint8_t)1)
 
 // Keycode Macros -------------------------------------------------------------
@@ -66,6 +73,7 @@ typedef union {
 
 // Keyboard Events
 void keyboard_post_init_user(void);
+void housekeeping_task_user(void);
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
 
 // Features

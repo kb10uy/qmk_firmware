@@ -83,6 +83,18 @@ kb10uy_config_t config = {0};
 uint8_t       lang_keys[]      = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
 layer_state_t layer_lock_state = 0;
 
+static void sync_state_slave_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
+    (void)in_buflen;
+    (void)out_buflen;
+    (void)out_data;
+
+    const kb10uy_sync_state_t *sync_state = (const kb10uy_sync_state_t *)in_data;
+
+    config.os_mode     = sync_state->os_mode;
+    layer_lock_state   = sync_state->locked_layers;
+    update_os_mode_setting();
+}
+
 static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
     uint8_t index = g_led_config.matrix_co[row][col];
     if (index != NO_LED) {
@@ -93,6 +105,25 @@ static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t
 void keyboard_post_init_user(void) {
     load_sync_config();
     update_os_mode_setting();
+    transaction_register_rpc(KB10UY_SYNC_STATE, sync_state_slave_handler);
+}
+
+void housekeeping_task_user(void) {
+    if (!is_keyboard_master()) {
+        return;
+    }
+
+    static uint32_t last_sync = 0;
+    if (timer_elapsed32(last_sync) > 25) {
+        kb10uy_sync_state_t sync_state = {
+            .os_mode       = config.os_mode,
+            .locked_layers = layer_lock_state,
+        };
+
+        if (transaction_rpc_send(KB10UY_SYNC_STATE, sizeof(sync_state), &sync_state)) {
+            last_sync = timer_read32();
+        }
+    }
 }
 
 void eeconfig_init_user(void) {

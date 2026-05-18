@@ -25,6 +25,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SPLIT_LAYER_STATE_ENABLE
 #define SPLIT_LED_STATE_ENABLE
 #define SPLIT_MODS_ENABLE
+#define SPLIT_TRANSACTION_IDS_USER KB10UY_SYNC_STATE
 
 // Debounce
 #define DEBOUNCE 3
