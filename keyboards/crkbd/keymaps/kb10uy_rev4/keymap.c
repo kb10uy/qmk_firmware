@@ -18,6 +18,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "keymap.h"
+#include <string.h>
+#include "transactions.h"
 
 // clang-format off
 
@@ -74,32 +76,25 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
 
 // clang-format on
 
+static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b);
+static void sync_state_slave_handler(uint8_t _in_buflen, const void *in_data, uint8_t _out_buflen, void *_out_data);
+
 tap_dance_action_t tap_dance_actions[] = {
     [KB10UY_TD_FN1] = ACTION_TAP_DANCE_FN_ADVANCED(NULL, dance_fn1_finished, dance_fn1_reset),
 };
 
-kb10uy_config_t config = {0};
+kb10uy_config_t config                  = {0};
+uint8_t         lang_keys[]             = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
+layer_state_t   layer_lock_state        = 0;
+bool            should_sync_split_state = false;
 
-uint8_t       lang_keys[]      = {KC_INTERNATIONAL_5, KC_INTERNATIONAL_4};
-layer_state_t layer_lock_state = 0;
+// Keyboard Events ------------------------------------------------------------
 
-static void sync_state_slave_handler(uint8_t in_buflen, const void *in_data, uint8_t out_buflen, void *out_data) {
-    (void)in_buflen;
-    (void)out_buflen;
-    (void)out_data;
+void eeconfig_init_user(void) {
+    config.config_version = KB10UY_CONFIG_VERSION;
+    config.os_mode        = K1_WINDOWS;
 
-    const kb10uy_sync_state_t *sync_state = (const kb10uy_sync_state_t *)in_data;
-
-    config.os_mode     = sync_state->os_mode;
-    layer_lock_state   = sync_state->locked_layers;
-    update_os_mode_setting();
-}
-
-static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
-    uint8_t index = g_led_config.matrix_co[row][col];
-    if (index != NO_LED) {
-        rgb_matrix_set_color(index, r, g, b);
-    }
+    eeconfig_update_user(config.raw);
 }
 
 void keyboard_post_init_user(void) {
@@ -109,28 +104,16 @@ void keyboard_post_init_user(void) {
 }
 
 void housekeeping_task_user(void) {
-    if (!is_keyboard_master()) {
-        return;
-    }
+    if (!is_keyboard_master()) return;
 
-    static uint32_t last_sync = 0;
-    if (timer_elapsed32(last_sync) > 25) {
+    if (should_sync_split_state) {
         kb10uy_sync_state_t sync_state = {
             .os_mode       = config.os_mode,
             .locked_layers = layer_lock_state,
         };
-
-        if (transaction_rpc_send(KB10UY_SYNC_STATE, sizeof(sync_state), &sync_state)) {
-            last_sync = timer_read32();
-        }
+        bool result = transaction_rpc_send(KB10UY_SYNC_STATE, sizeof(sync_state), &sync_state);
+        if (result) should_sync_split_state = false;
     }
-}
-
-void eeconfig_init_user(void) {
-    config.config_version = KB10UY_CONFIG_VERSION;
-    config.os_mode        = K1_WINDOWS;
-
-    eeconfig_update_user(config.raw);
 }
 
 bool process_record_user(uint16_t keycode, keyrecord_t *record) {
@@ -158,69 +141,9 @@ bool process_record_user(uint16_t keycode, keyrecord_t *record) {
     return true;
 }
 
-void change_next_os_mode(void) {
-    config.os_mode = (config.os_mode + 1) % K1_OS_MAX;
-    update_os_mode_setting();
-    sync_save_config();
-}
-
-void update_os_mode_setting(void) {
-    switch (config.os_mode) {
-        case K1_WINDOWS:
-            lang_keys[0] = KC_INTERNATIONAL_5;
-            lang_keys[1] = KC_INTERNATIONAL_4;
-            break;
-        case K1_MACOS:
-            lang_keys[0] = KC_LANGUAGE_2;
-            lang_keys[1] = KC_LANGUAGE_1;
-            break;
-        case K1_LINUX:
-            lang_keys[0] = KC_INTERNATIONAL_5;
-            lang_keys[1] = KC_INTERNATIONAL_4;
-            break;
-        case K1_ANDROID:
-            lang_keys[0] = KC_INTERNATIONAL_5;
-            lang_keys[1] = KC_INTERNATIONAL_4;
-            break;
-    }
-}
-
-void load_sync_config(void) {
-    config.raw = eeconfig_read_user();
-    if (config.config_version < KB10UY_CONFIG_VERSION) {
-        eeconfig_init_user();
-    }
-}
-
-void sync_save_config(void) {
-    eeconfig_update_user(config.raw);
-}
-
-void dance_fn1_finished(tap_dance_state_t *state, void *user_data) {
-    layer_on(1);
-
-    if (state->count >= 2 /* && state->count < TAPPING_TOGGLE */) {
-        register_code16(KC_LSFT);
-    }
-
-    // if (state->count == TAPPING_TOGGLE) {
-    //     lower_locked = !lower_locked;
-    // }
-}
-
-void dance_fn1_reset(tap_dance_state_t *state, void *user_data) {
-    bool lower_layer_locked = (layer_lock_state & (1UL << _LOWER)) != 0;
-    if (!lower_layer_locked) {
-        layer_off(_LOWER);
-    }
-
-    if (state->count >= 2) {
-        unregister_code16(KC_LSFT);
-    }
-}
-
 bool layer_lock_set_user(layer_state_t locked_layers) {
-    layer_lock_state = locked_layers;
+    layer_lock_state        = locked_layers;
+    should_sync_split_state = true;
     return true;
 }
 
@@ -271,4 +194,91 @@ bool rgb_matrix_indicators_user(void) {
     }
 
     return false;
+}
+
+// Tap Dance ------------------------------------------------------------------
+
+void dance_fn1_finished(tap_dance_state_t *state, void *user_data) {
+    layer_on(1);
+
+    if (state->count >= 2 /* && state->count < TAPPING_TOGGLE */) {
+        register_code16(KC_LSFT);
+    }
+
+    // if (state->count == TAPPING_TOGGLE) {
+    //     lower_locked = !lower_locked;
+    // }
+}
+
+void dance_fn1_reset(tap_dance_state_t *state, void *user_data) {
+    bool lower_layer_locked = (layer_lock_state & (1UL << _LOWER)) != 0;
+    if (!lower_layer_locked) {
+        layer_off(_LOWER);
+    }
+
+    if (state->count >= 2) {
+        unregister_code16(KC_LSFT);
+    }
+}
+
+// Features -------------------------------------------------------------------
+
+void change_next_os_mode(void) {
+    config.os_mode = (config.os_mode + 1) % K1_OS_MAX;
+    update_os_mode_setting();
+    should_sync_split_state = true;
+    sync_save_config();
+}
+
+void update_os_mode_setting(void) {
+    switch (config.os_mode) {
+        case K1_WINDOWS:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+        case K1_MACOS:
+            lang_keys[0] = KC_LANGUAGE_2;
+            lang_keys[1] = KC_LANGUAGE_1;
+            break;
+        case K1_LINUX:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+        case K1_ANDROID:
+            lang_keys[0] = KC_INTERNATIONAL_5;
+            lang_keys[1] = KC_INTERNATIONAL_4;
+            break;
+    }
+}
+
+void load_sync_config(void) {
+    config.raw = eeconfig_read_user();
+    if (config.config_version < KB10UY_CONFIG_VERSION) {
+        eeconfig_init_user();
+    }
+}
+
+void sync_save_config(void) {
+    eeconfig_update_user(config.raw);
+}
+
+// Internals ------------------------------------------------------------------
+
+static void sync_state_slave_handler(uint8_t _in_buflen, const void *in_data, uint8_t _out_buflen, void *_out_data) {
+    // Must be memcpy-ed to avoid alignment issues
+    kb10uy_sync_state_t received = {0};
+
+    if (_in_buflen != sizeof(kb10uy_sync_state_t)) return;
+    memcpy(&received, in_data, sizeof(kb10uy_sync_state_t));
+
+    config.os_mode   = received.os_mode;
+    layer_lock_state = received.locked_layers;
+    update_os_mode_setting();
+}
+
+static void set_indicator_key_color(uint8_t row, uint8_t col, uint8_t r, uint8_t g, uint8_t b) {
+    uint8_t index = g_led_config.matrix_co[row][col];
+    if (index != NO_LED) {
+        rgb_matrix_set_color(index, r, g, b);
+    }
 }

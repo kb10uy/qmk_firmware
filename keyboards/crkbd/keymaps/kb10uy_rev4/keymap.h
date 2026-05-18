@@ -72,22 +72,19 @@ typedef struct {
 // Function Declarations ------------------------------------------------------
 
 // Keyboard Events
+void eeconfig_init_user(void);
 void keyboard_post_init_user(void);
 void housekeeping_task_user(void);
 bool process_record_user(uint16_t keycode, keyrecord_t *record);
+bool layer_lock_set_user(layer_state_t locked_layers);
+bool rgb_matrix_indicators_user(void);
+
+// Tap Dance
+void dance_fn1_finished(tap_dance_state_t *state, void *user_data);
+void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
 
 // Features
 void change_next_os_mode(void);
 void update_os_mode_setting(void);
 void load_sync_config(void);
 void sync_save_config(void);
-
-// Tap Dance
-void dance_fn1_finished(tap_dance_state_t *state, void *user_data);
-void dance_fn1_reset(tap_dance_state_t *state, void *user_data);
-
-// RGB Matrix
-bool rgb_matrix_indicators_user(void);
-
-// Layer Lock
-bool layer_lock_set_user(layer_state_t locked_layers);
