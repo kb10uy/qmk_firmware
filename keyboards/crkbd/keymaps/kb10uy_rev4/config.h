@@ -30,6 +30,16 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // Debounce
 #define DEBOUNCE 3
 
+// Bootmagic Lite (hold on startup to jump to bootloader)
+#undef BOOTMAGIC_ROW
+#undef BOOTMAGIC_COLUMN
+#undef BOOTMAGIC_ROW_RIGHT
+#undef BOOTMAGIC_COLUMN_RIGHT
+#define BOOTMAGIC_ROW 0
+#define BOOTMAGIC_COLUMN 0
+#define BOOTMAGIC_ROW_RIGHT 4
+#define BOOTMAGIC_COLUMN_RIGHT 0
+
 // Tapping
 #define TAPPING_TERM 175
 #define TAPPING_TOGGLE 5
