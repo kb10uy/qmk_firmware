@@ -26,7 +26,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
     [_DEFAULT] = LAYOUT_split_3x6_3_ex2(
     //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
-         KC_ESC,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T, XXXXXXX,    XXXXXXX,    KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,
+         KC_ESC,    KC_Q,    KC_W,    KC_E,    KC_R,    KC_T,  MO_LHD,     MO_RHD,    KC_Y,    KC_U,    KC_I,    KC_O,   KC_P,  KC_BSPC,
     //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
          KC_TAB,    KC_A,    KC_S,    KC_D,    KC_F,    KC_G, XXXXXXX,    XXXXXXX,    KC_H,    KC_J,    KC_K,    KC_L, KC_SCLN, KC_QUOT,
     //|--------+--------+--------+--------+--------+--------|--------'  `--------+--------+--------+--------+--------+--------+--------|
@@ -70,6 +70,29 @@ const uint16_t PROGMEM keymaps[][MATRIX_ROWS][MATRIX_COLS] = {
         _______, RM_TOGG, RM_VALD, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX,   KC_P1,   KC_P2,   KC_P3, KC_PENT, XXXXXXX,
     //`--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------'
                                              TT_ADJ, XXXXXXX, XXXXXXX,    KC_PDOT,   KC_P0, XXXXXXX
+                                        //`--------------------------'  `--------------------------'
+    ),
+
+    [_LEFTHAND] = LAYOUT_split_3x6_3_ex2(
+    //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,  MO_LHD,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+    //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+    //|--------+--------+--------+--------+--------+--------|--------'  `--------+--------+--------+--------+--------+--------+--------|
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+    //`--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------'
+                                            XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX
+                                        //`--------------------------'  `--------------------------'
+    ),
+    [_RIGHTHAND] = LAYOUT_split_3x6_3_ex2(
+    //,--------------------------------------------------------------.  ,--------------------------------------------------------------.
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,     MO_RHD, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+    //|--------+--------+--------+--------+--------+--------+--------|  |--------+--------+--------+--------+--------+--------+--------|
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, KC_LEFT, KC_DOWN,   KC_UP,KC_RIGHT, XXXXXXX, XXXXXXX,
+    //|--------+--------+--------+--------+--------+--------|--------'  `--------+--------+--------+--------+--------+--------+--------|
+        _______, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,                      XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX, XXXXXXX,
+    //`--------+--------+--------+--------+--------+--------+--------.  ,--------+--------+--------+--------+--------+--------+--------'
+                                            XXXXXXX, XXXXXXX, XXXXXXX,    XXXXXXX, XXXXXXX, XXXXXXX
                                         //`--------------------------'  `--------------------------'
     ),
 };
@@ -187,6 +210,12 @@ bool rgb_matrix_indicators_user(void) {
             break;
         case _ADJUST:
             set_indicator_key_color(1, 6, layer_locked ? 224 : 16, layer_locked ? 160 : 8, layer_locked ? 255 : 24);
+            break;
+        case _LEFTHAND:
+            set_indicator_key_color(1, 6, 0, 0, 24);
+            break;
+        case _RIGHTHAND:
+            set_indicator_key_color(1, 6, 24, 0, 0);
             break;
         default:
             set_indicator_key_color(1, 6, 0, 0, 0);

@@ -28,6 +28,8 @@ enum kb10uy_layer {
     _LOWER,
     _RAISE,
     _ADJUST,
+    _LEFTHAND,
+    _RIGHTHAND,
 };
 
 enum kb10uy_key_code {
@@ -68,6 +70,8 @@ typedef struct {
 #define TD_FN1 (TD(KB10UY_TD_FN1))
 #define MO_RAI (MO(_RAISE))
 #define TT_ADJ (TT(_ADJUST))
+#define MO_LHD (MO(_LEFTHAND))
+#define MO_RHD (MO(_RIGHTHAND))
 
 // Function Declarations ------------------------------------------------------
 
