@@ -573,7 +573,11 @@ const USB_Descriptor_Configuration_t PROGMEM ConfigurationDescriptor = {
         .TotalInterfaces        = TOTAL_INTERFACES,
         .ConfigurationNumber    = 1,
         .ConfigurationStrIndex  = NO_DESCRIPTOR,
+#ifdef USB_NO_REMOTE_WAKEUP
+        .ConfigAttributes       = USB_CONFIG_ATTR_RESERVED,
+#else
         .ConfigAttributes       = (USB_CONFIG_ATTR_RESERVED | USB_CONFIG_ATTR_REMOTEWAKEUP),
+#endif
         .MaxPowerConsumption    = USB_CONFIG_POWER_MA(USB_MAX_POWER_CONSUMPTION)
     },
 #ifndef KEYBOARD_SHARED_EP

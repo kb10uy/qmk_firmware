@@ -27,6 +27,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #define SPLIT_MODS_ENABLE
 #define SPLIT_TRANSACTION_IDS_USER KB10UY_SYNC_STATE
 
+// USB: do not advertise remote wakeup, so that the host has no reason to
+// selectively suspend the keyboard while idle (it can no longer wake the PC)
+#define USB_NO_REMOTE_WAKEUP
+
 // Debounce
 #define DEBOUNCE 3
 
